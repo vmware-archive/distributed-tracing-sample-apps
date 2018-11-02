@@ -3,12 +3,7 @@ package com.wfsample.shopping;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
-import com.wfsample.common.dto.OrderStatusDTO;
-import com.wfsample.common.dto.PackedShirtsDTO;
-import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
-
-import java.util.UUID;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -32,13 +27,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Produces(MediaType.APPLICATION_JSON)
 public class ShoppingController {
   private final StylingApi stylingApi;
-  private final DeliveryApi deliveryApi;
 
   ShoppingController() {
     String stylingUrl = "http://localhost:50051";
-    String deliveryUrl = "http://localhost:50052";
     this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class);
-    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class);
   }
 
   @GET
