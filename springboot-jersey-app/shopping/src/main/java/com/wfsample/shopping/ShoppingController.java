@@ -5,6 +5,9 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
 
+import java.util.concurrent.ThreadLocalRandom;
+
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -43,8 +46,16 @@ public class ShoppingController {
   @Path("/order")
   @Consumes(APPLICATION_JSON)
   public Response orderShirts(OrderDTO orderDTO, @Context HttpHeaders httpHeaders) {
-    DeliveryStatusDTO deliveryStatus = stylingApi.makeShirts(
+    if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
+      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Failed to order shirts!").build();
+    }
+    Response deliveryResponse = stylingApi.makeShirts(
         orderDTO.getStyleName(), orderDTO.getQuantity());
-    return Response.ok().entity(deliveryStatus).build();
+    if (deliveryResponse.getStatus() < 400) {
+      DeliveryStatusDTO deliveryStatus = deliveryResponse.readEntity(DeliveryStatusDTO.class);
+      return Response.ok().entity(deliveryStatus).build();
+    } else {
+      return Response.status(deliveryResponse.getStatus()).entity("Failed to order shirts!").build();
+    }
   }
 }

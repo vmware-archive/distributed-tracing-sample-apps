@@ -11,6 +11,7 @@ import com.wfsample.service.StylingApi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.core.Response;
 
@@ -44,7 +45,13 @@ public class StylingController implements StylingApi {
     return this.shirtStyleDTOS;
   }
 
-  public DeliveryStatusDTO makeShirts(String id, int quantity) {
+  public Response makeShirts(String id, int quantity) {
+    /*
+     * TODO: Try to report the value of quantity using WavefrontHistogram.
+     */
+    if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
+      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Failed to make shirts!").build();
+    }
     String orderNum = UUID.randomUUID().toString();
     List<ShirtDTO> packedShirts = new ArrayList<>();
     for (int i = 0; i < quantity; i++) {
@@ -55,6 +62,10 @@ public class StylingController implements StylingApi {
             new ShirtStyleDTO(shirt.getStyle().getName(), shirt.getStyle().getImageUrl()))).
         collect(toList()));
     Response deliveryResponse = deliveryApi.dispatch(orderNum, packedShirtsDTO);
-    return deliveryResponse.readEntity(DeliveryStatusDTO.class);
+    if (deliveryResponse.getStatus() < 400) {
+      return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
+    } else {
+      return Response.status(deliveryResponse.getStatus()).entity("Failed to make shirts").build();
+    }
   }
 }

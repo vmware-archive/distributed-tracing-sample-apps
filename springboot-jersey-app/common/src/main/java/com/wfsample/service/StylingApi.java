@@ -1,6 +1,5 @@
 package com.wfsample.service;
 
-import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.ShirtStyleDTO;
 
 import java.util.List;
@@ -12,6 +11,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * API interface for beachshirt styling service.
@@ -28,5 +28,5 @@ public interface StylingApi {
   @GET
   @Path("{id}/make")
   @Consumes(MediaType.APPLICATION_JSON)
-  DeliveryStatusDTO makeShirts(@PathParam("id") String id, @QueryParam("quantity") int quantity);
+  Response makeShirts(@PathParam("id") String id, @QueryParam("quantity") int quantity);
 }
