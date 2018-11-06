@@ -1,6 +1,7 @@
 # Wavefront Hackthon - Springboot Jersey App
 
-This is a sample java application using Springboot with Jersey called beachshirts which makes cool shirts for beach. 
+This is a sample java application using Springboot with Jersey called beachshirts (#[beachops](https://medium.com/@matthewzeier/thoughts-from-an-operations-wrangler-how-we-use-alerts-to-monitor-wavefront-71329c5e57a8)) 
+which makes shirts for beach. 
 
 ## Running Application locally 
 

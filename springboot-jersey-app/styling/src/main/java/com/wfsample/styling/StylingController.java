@@ -48,6 +48,10 @@ public class StylingController implements StylingApi {
   public Response makeShirts(String id, int quantity) {
     /*
      * TODO: Try to report the value of quantity using WavefrontHistogram.
+     *
+     * Viewing the quantity requested by various clients as a minute distribution and then applying
+     * statistical functions (median, mean, min, max, p95, p99 etc.) on that data is really useful
+     * to understand the user trend.
      */
     if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
       return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Failed to make shirts!").build();

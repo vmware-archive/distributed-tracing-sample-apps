@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response;
 public class DeliveryController implements DeliveryApi {
   /*
    * TODO: Add a gauge to monitor the size of dispatch queue.
+   * Also, consider adding relevant ApplicationTags for this metric.
    */
   private static Queue<PackedShirtsDTO> dispatchQueue;
 
@@ -39,14 +40,16 @@ public class DeliveryController implements DeliveryApi {
     }
     if (orderNum.isEmpty()) {
       /*
-       * TODO: Try to emitting an error counter to Wavefront.
+       * TODO: Try to emit an error counter to Wavefront.
+       * Also, consider adding relevant ApplicationTags for this metric.
        */
       return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
     }
     if (packedShirts == null || packedShirts.getShirts() == null ||
         packedShirts.getShirts().size() == 0) {
       /*
-       * TODO: Try to emitting an error counter to Wavefront.
+       * TODO: Try to emit an error counter to Wavefront.
+       * Also, consider adding relevant ApplicationTags for this metric.
        */
       return Response.status(Response.Status.BAD_REQUEST).entity("no shirts to deliver").build();
     }
@@ -68,6 +71,7 @@ public class DeliveryController implements DeliveryApi {
   private void deliverPackedShirts(PackedShirtsDTO packedShirtsDTO) {
     /*
      * TODO: Try to Increment a counter when one packed shirts delivered.
+     * Also, consider adding relevant ApplicationTags for this metric.
      */
     System.out.println(packedShirtsDTO.getShirts().size() + " shirts delivered!");
   }
@@ -75,6 +79,10 @@ public class DeliveryController implements DeliveryApi {
   @Override
   public Response retrieve(String orderNum) {
     if (orderNum.isEmpty()) {
+      /*
+       * TODO: Try to emit an error counter to Wavefront.
+       * Also, consider adding relevant ApplicationTags for this metric.
+       */
       return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
     }
     return Response.ok("Order: " + orderNum + " returned").build();
