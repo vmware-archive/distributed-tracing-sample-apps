@@ -10,9 +10,9 @@ which makes shirts for beach.
 - Now run all the services using below commands from root directory of the project.
 
   ```bash
-  java -jar ./shopping/target/shopping-1.0.0-SNAPSHOT.jar
-  java -jar ./styling/target/styling-1.0.0-SNAPSHOT.jar
-  java -jar ./delivery/target/delivery-1.0.0-SNAPSHOT.jar
+  java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar
+  java -jar ./styling/target/styling-1.0-SNAPSHOT.jar
+  java -jar ./delivery/target/delivery-1.0-SNAPSHOT.jar
   ```
 
 - Now view the shopping menus using HTTP GET request: `http://localhost:50050/shop/menu`
