@@ -27,6 +27,7 @@ import io.dropwizard.setup.Environment;
 public class DeliveryService extends Application<DropwizardServiceConfig> {
   /*
    * TODO: Add a gauge to monitor the size of dispatch queue.
+   * Also, consider adding relevant ApplicationTags for this metric.
    */
   private static Queue<PackedShirtsDTO> dispatchQueue;
 
@@ -60,6 +61,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
     private void deliverPackedShirts(PackedShirtsDTO packedShirtsDTO) {
       /*
        * TODO: Try to Increment a counter when one packed shirts delivered.
+       * Also, consider adding relevant ApplicationTags for this metric.
        */
       System.out.println(packedShirtsDTO.getShirts().size() + " shirts delivered!");
     }
@@ -79,6 +81,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
       if (orderNum.isEmpty()) {
         /*
          * TODO: Try to emitting an error counter to Wavefront.
+         * Also, consider adding relevant ApplicationTags for this metric.
          */
         return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
       }
@@ -86,6 +89,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
           packedShirts.getShirts().size() == 0) {
         /*
          * TODO: Try to emitting an error counter to Wavefront.
+         * Also, consider adding relevant ApplicationTags for this metric.
          */
         return Response.status(Response.Status.BAD_REQUEST).entity("no shirts to deliver").build();
       }
@@ -99,6 +103,10 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
     @Override
     public Response retrieve(String orderNum) {
       if (orderNum.isEmpty()) {
+        /*
+         * TODO: Try to emitting an error counter to Wavefront.
+         * Also, consider adding relevant ApplicationTags for this metric.
+         */
         return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
       }
       return Response.ok("Order: " + orderNum + " returned").build();
