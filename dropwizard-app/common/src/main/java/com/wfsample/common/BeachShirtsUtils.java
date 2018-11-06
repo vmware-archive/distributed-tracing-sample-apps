@@ -25,6 +25,7 @@ public final class BeachShirtsUtils {
     ApacheHttpClient4Engine apacheHttpClient4Engine = new ApacheHttpClient4Engine(httpClient, true);
     ResteasyProviderFactory factory = ResteasyProviderFactory.getInstance();
     factory.registerProvider(ResteasyJackson2Provider.class);
+    // TODO: Make sure context is propagated correctly so that emitted spans belong to the same trace.
     ResteasyClient resteasyClient = new ResteasyClientBuilder().
         httpEngine(apacheHttpClient4Engine).providerFactory(factory).build();
     ResteasyWebTarget target = resteasyClient.target(url);
