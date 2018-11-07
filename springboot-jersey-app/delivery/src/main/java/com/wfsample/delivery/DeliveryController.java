@@ -69,10 +69,12 @@ public class DeliveryController implements DeliveryApi {
   }
 
   private void deliverPackedShirts(PackedShirtsDTO packedShirtsDTO) {
-    /*
-     * TODO: Try to Increment a counter when one packed shirts delivered.
-     * Also, consider adding relevant ApplicationTags for this metric.
-     */
+    for (int i = 0; i < packedShirtsDTO.getShirts().size(); i++) {
+      /*
+      * TODO: Try to Increment a delta counter when shirts are delivered.
+      * Also, consider adding relevant ApplicationTags for this metric.
+      */
+    }
     System.out.println(packedShirtsDTO.getShirts().size() + " shirts delivered!");
   }
 

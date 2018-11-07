@@ -68,6 +68,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
     public Response makeShirts(String id, int quantity) {
       /*
        * TODO: Try to report the value of quantity using WavefrontHistogram.
+       * Important: Make sure you are sending to Minute bin instead of Hour or Day bin!
        *
        * Viewing the quantity requested by various clients as a minute distribution and then
        * applying statistical functions (median, mean, min, max, p95, p99 etc.) on that data is
