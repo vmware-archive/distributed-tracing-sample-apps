@@ -85,6 +85,9 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         logger.warn(msg);
         return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
       }
+      if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
+        orderNum = "";
+      }
       if (orderNum.isEmpty()) {
         /*
          * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
@@ -92,6 +95,9 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         String msg = "Invalid Order Num";
         logger.warn(msg);
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+      }
+      if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
+        packedShirts = null;
       }
       if (packedShirts == null || packedShirts.getShirts() == null ||
           packedShirts.getShirts().size() == 0) {
