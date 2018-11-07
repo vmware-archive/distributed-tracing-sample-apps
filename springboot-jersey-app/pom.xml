@@ -35,6 +35,11 @@
             <artifactId>resteasy-jackson2-provider</artifactId>
             <version>3.0.21.Final</version>
         </dependency>
+        <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-jaxrs2</artifactId>
+            <version>0.2.1</version>
+        </dependency>
     </dependencies>
 
     <build>

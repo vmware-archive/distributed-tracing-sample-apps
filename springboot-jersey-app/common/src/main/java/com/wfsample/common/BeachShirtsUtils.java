@@ -9,6 +9,8 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
+import java.util.ArrayList;
+
 
 /**
  * Utilities for use by the various beachshirts application related services.
@@ -22,15 +24,22 @@ public final class BeachShirtsUtils {
 
   public static <T> T createProxyClient(String url, Class<T> clazz) {
     HttpClient httpClient = HttpClientBuilder.create().setMaxConnTotal(2000).
-        setMaxConnPerRoute(1000).build();
+            setMaxConnPerRoute(1000).build();
     ApacheHttpClient4Engine apacheHttpClient4Engine = new ApacheHttpClient4Engine(httpClient, true);
     ResteasyProviderFactory factory = ResteasyProviderFactory.getInstance();
     factory.registerProvider(ResteasyJackson2Provider.class);
-    // TODO: Make sure context is propagated correctly so that emitted spans belong to the same trace.
-    ResteasyClient resteasyClient = new ResteasyClientBuilder().
-        httpEngine(apacheHttpClient4Engine).providerFactory(factory).build();
-    ResteasyWebTarget target = resteasyClient.target(url);
+
+    ResteasyClientBuilder resteasyClientBuilder = new ResteasyClientBuilder().
+            httpEngine(apacheHttpClient4Engine).providerFactory(factory);
+
+    /**
+     * TODO: Make sure context is propagated correctly so that emitted spans belong to the same trace.
+     * In order to achieve this, pass in WavefrontTracer to this method and uncomment the 2 lines below
+     */
+    // ClientTracingFilter filter = new ClientTracingFilter(tracer, new ArrayList<>());
+    // resteasyClientBuilder.register(filter);
+
+    ResteasyWebTarget target = resteasyClientBuilder.build().target(url);
     return target.proxy(clazz);
   }
-
 }
