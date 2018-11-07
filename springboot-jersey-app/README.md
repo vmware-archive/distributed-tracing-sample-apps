@@ -24,4 +24,4 @@ which makes shirts for beach.
   Payload: {"styleName" : "testStyle1","quantity" : 5}
   ```
 
-- Use `./loadgen {interval}` in the root directory to send a request of ordering shirts every  `{interval}` seconds
+- Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds
