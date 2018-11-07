@@ -5,6 +5,9 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.BadRequestException;
@@ -30,6 +33,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Produces(MediaType.APPLICATION_JSON)
 public class ShoppingController {
   private final StylingApi stylingApi;
+  private static Logger logger = LoggerFactory.getLogger(ShoppingService.class);
 
   ShoppingController() {
     String stylingUrl = "http://localhost:50051";
@@ -47,15 +51,17 @@ public class ShoppingController {
   @Consumes(APPLICATION_JSON)
   public Response orderShirts(OrderDTO orderDTO, @Context HttpHeaders httpHeaders) {
     if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
-      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Failed to order shirts!").build();
-    }
+      String msg = "Failed to order shirts!";
+      logger.warn(msg);
+      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();    }
     Response deliveryResponse = stylingApi.makeShirts(
         orderDTO.getStyleName(), orderDTO.getQuantity());
     if (deliveryResponse.getStatus() < 400) {
       DeliveryStatusDTO deliveryStatus = deliveryResponse.readEntity(DeliveryStatusDTO.class);
       return Response.ok().entity(deliveryStatus).build();
     } else {
-      return Response.status(deliveryResponse.getStatus()).entity("Failed to order shirts!").build();
-    }
+      String msg = "Failed to order shirts!";
+      logger.warn(msg);
+      return Response.status(deliveryResponse.getStatus()).entity(msg).build();    }
   }
 }

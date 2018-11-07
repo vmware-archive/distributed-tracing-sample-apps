@@ -5,6 +5,9 @@ import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -30,6 +33,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
    * Also, consider adding relevant ApplicationTags for this metric.
    */
   private static Queue<PackedShirtsDTO> dispatchQueue;
+  private static Logger logger = LoggerFactory.getLogger(DeliveryService.class);
 
   private DeliveryService() {
   }
@@ -77,23 +81,26 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
     @Override
     public Response dispatch(String orderNum, PackedShirtsDTO packedShirts) {
       if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Failed to dispatch " +
-            "shirts!").build();
+        String msg = "Failed to dispatch shirts!";
+        logger.warn(msg);
+        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
       }
       if (orderNum.isEmpty()) {
         /*
-         * TODO: Try to emitting an error counter to Wavefront.
-         * Also, consider adding relevant ApplicationTags for this metric.
+         * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
          */
-        return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
+        String msg = "Invalid Order Num";
+        logger.warn(msg);
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
       }
       if (packedShirts == null || packedShirts.getShirts() == null ||
           packedShirts.getShirts().size() == 0) {
         /*
-         * TODO: Try to emitting an error counter to Wavefront.
-         * Also, consider adding relevant ApplicationTags for this metric.
+         * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
          */
-        return Response.status(Response.Status.BAD_REQUEST).entity("no shirts to deliver").build();
+        String msg = "No shirts to deliver";
+        logger.warn(msg);
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
       }
       dispatchQueue.add(packedShirts);
       String trackingNum = UUID.randomUUID().toString();
@@ -106,10 +113,11 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
     public Response retrieve(String orderNum) {
       if (orderNum.isEmpty()) {
         /*
-         * TODO: Try to emitting an error counter to Wavefront.
-         * Also, consider adding relevant ApplicationTags for this metric.
+         * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
          */
-        return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
+        String msg = "Invalid Order Num";
+        logger.warn(msg);
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
       }
       return Response.ok("Order: " + orderNum + " returned").build();
     }

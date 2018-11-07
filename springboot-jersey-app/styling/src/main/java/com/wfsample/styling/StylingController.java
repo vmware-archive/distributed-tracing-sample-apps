@@ -8,6 +8,9 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 public class StylingController implements StylingApi {
   private final DeliveryApi deliveryApi;
   private List<ShirtStyleDTO> shirtStyleDTOS;
+  private static Logger logger = LoggerFactory.getLogger(StylingService.class);
 
   StylingController() {
     String deliveryUrl = "http://localhost:50052";
@@ -54,7 +58,9 @@ public class StylingController implements StylingApi {
      * to understand the user trend.
      */
     if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
-      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Failed to make shirts!").build();
+      String msg = "Failed to make shirts!";
+      logger.warn(msg);
+      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
     }
     String orderNum = UUID.randomUUID().toString();
     List<ShirtDTO> packedShirts = new ArrayList<>();
@@ -69,7 +75,9 @@ public class StylingController implements StylingApi {
     if (deliveryResponse.getStatus() < 400) {
       return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
     } else {
-      return Response.status(deliveryResponse.getStatus()).entity("Failed to make shirts").build();
+      String msg = "Failed to make shirts!";
+      logger.warn(msg);
+      return Response.status(deliveryResponse.getStatus()).entity(msg).build();
     }
   }
 }
