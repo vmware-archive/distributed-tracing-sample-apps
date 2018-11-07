@@ -4,6 +4,7 @@ import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
+import io.opentracing.Tracer;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -31,9 +32,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class ShoppingController {
   private final StylingApi stylingApi;
 
-  ShoppingController() {
+  ShoppingController(Tracer tracer) {
     String stylingUrl = "http://localhost:50051";
-    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class);
+    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, tracer);
   }
 
   @GET

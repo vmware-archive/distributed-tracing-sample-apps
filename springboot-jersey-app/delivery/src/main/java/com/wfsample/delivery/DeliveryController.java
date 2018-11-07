@@ -1,18 +1,22 @@
 package com.wfsample.delivery;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.DeltaCounter;
+import com.codahale.metrics.Gauge;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.service.DeliveryApi;
-
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.inject.Singleton;
+import javax.ws.rs.core.Response;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ThreadLocalRandom;
 
-import javax.ws.rs.core.Response;
+import static com.wfsample.constants.CommonRegistry.METRIC_REGISTRY;
 
 /**
  * Controller for delivery service which is responsible for dispatching shirts returning tracking
@@ -22,71 +26,59 @@ import javax.ws.rs.core.Response;
  */
 @Component
 public class DeliveryController implements DeliveryApi {
-  /*
-   * TODO: Add a gauge to monitor the size of dispatch queue.
-   * Also, consider adding relevant ApplicationTags for this metric.
-   */
-  private static Queue<PackedShirtsDTO> dispatchQueue;
+    private static Queue<PackedShirtsDTO> dispatchQueue;
+    private static final Gauge<Integer> queuesize = METRIC_REGISTRY.register("delivery.queue_size",
+            () -> dispatchQueue.size());
+    private final Counter invalidDispatchOrders = METRIC_REGISTRY.counter("delivery.dispatch.invalid_orders");
+    private final Counter invalidRetrieveOrders = METRIC_REGISTRY.counter("delivery.retrieve.invalid_orders");
+    private final Counter noShirts = METRIC_REGISTRY.counter("delivery.dispatch.no_shirts");
+    private final DeltaCounter delivered = DeltaCounter.get(METRIC_REGISTRY, "delivery.shirts_delivered");
 
-  public DeliveryController() {
-    dispatchQueue = new ConcurrentLinkedDeque<>();
-  }
+    public DeliveryController() {
+        dispatchQueue = new ConcurrentLinkedDeque<>();
+    }
 
-  @Override
-  public Response dispatch(String orderNum, PackedShirtsDTO packedShirts) {
-    if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
-      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Failed to dispatch " +
-          "shirts!").build();
+    @Override
+    public Response dispatch(String orderNum, PackedShirtsDTO packedShirts) {
+        if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Failed to dispatch " +
+                    "shirts!").build();
+        }
+        if (orderNum.isEmpty()) {
+            invalidDispatchOrders.inc();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
+        }
+        if (packedShirts == null || packedShirts.getShirts() == null ||
+                packedShirts.getShirts().size() == 0) {
+            noShirts.inc();
+            return Response.status(Response.Status.BAD_REQUEST).entity("no shirts to deliver").build();
+        }
+        dispatchQueue.add(packedShirts);
+        String trackingNum = UUID.randomUUID().toString();
+        System.out.println("Tracking number of Order:" + orderNum + " is " + trackingNum);
+        return Response.ok(new DeliveryStatusDTO(orderNum, trackingNum,
+                "shirts delivery dispatched")).build();
     }
-    if (orderNum.isEmpty()) {
-      /*
-       * TODO: Try to emit an error counter to Wavefront.
-       * Also, consider adding relevant ApplicationTags for this metric.
-       */
-      return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
-    }
-    if (packedShirts == null || packedShirts.getShirts() == null ||
-        packedShirts.getShirts().size() == 0) {
-      /*
-       * TODO: Try to emit an error counter to Wavefront.
-       * Also, consider adding relevant ApplicationTags for this metric.
-       */
-      return Response.status(Response.Status.BAD_REQUEST).entity("no shirts to deliver").build();
-    }
-    dispatchQueue.add(packedShirts);
-    String trackingNum = UUID.randomUUID().toString();
-    System.out.println("Tracking number of Order:" + orderNum + " is " + trackingNum);
-    return Response.ok(new DeliveryStatusDTO(orderNum, trackingNum,
-        "shirts delivery dispatched")).build();
-  }
 
-  @Scheduled(fixedRate = 30000)
-  private void processQueue() {
-    System.out.println("Processing " + dispatchQueue.size() + " in the Dispatch Queue!");
-    while (!dispatchQueue.isEmpty()) {
-      deliverPackedShirts(dispatchQueue.poll());
+    @Scheduled(fixedRate = 30000)
+    private void processQueue() {
+        System.out.println("Processing " + dispatchQueue.size() + " in the Dispatch Queue!");
+        while (!dispatchQueue.isEmpty()) {
+            deliverPackedShirts(dispatchQueue.poll());
+        }
     }
-  }
 
-  private void deliverPackedShirts(PackedShirtsDTO packedShirtsDTO) {
-    for (int i = 0; i < packedShirtsDTO.getShirts().size(); i++) {
-      /*
-      * TODO: Try to Increment a delta counter when shirts are delivered.
-      * Also, consider adding relevant ApplicationTags for this metric.
-      */
+    private void deliverPackedShirts(PackedShirtsDTO packedShirtsDTO) {
+        delivered.inc(packedShirtsDTO.getShirts().size());
+        System.out.println(packedShirtsDTO.getShirts().size() + " shirts delivered!");
     }
-    System.out.println(packedShirtsDTO.getShirts().size() + " shirts delivered!");
-  }
 
-  @Override
-  public Response retrieve(String orderNum) {
-    if (orderNum.isEmpty()) {
-      /*
-       * TODO: Try to emit an error counter to Wavefront.
-       * Also, consider adding relevant ApplicationTags for this metric.
-       */
-      return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
+    @Override
+    public Response retrieve(String orderNum) {
+        if (orderNum.isEmpty()) {
+            invalidRetrieveOrders.inc();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Order Num").build();
+        }
+        return Response.ok("Order: " + orderNum + " returned").build();
     }
-    return Response.ok("Order: " + orderNum + " returned").build();
-  }
 }
