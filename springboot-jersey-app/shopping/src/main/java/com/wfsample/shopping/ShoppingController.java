@@ -5,9 +5,9 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
 
+import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -17,6 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import io.opentracing.Tracer;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -31,9 +32,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class ShoppingController {
   private final StylingApi stylingApi;
 
-  ShoppingController() {
+  ShoppingController(Tracer tracer) throws IOException {
     String stylingUrl = "http://localhost:50051";
-    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class);
+    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, tracer);
   }
 
   @GET

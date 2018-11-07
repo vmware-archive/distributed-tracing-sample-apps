@@ -7,10 +7,10 @@ import com.wfsample.common.dto.ShirtStyleDTO;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
+import io.opentracing.Tracer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.core.Response;
@@ -27,9 +27,9 @@ public class StylingController implements StylingApi {
   private final DeliveryApi deliveryApi;
   private List<ShirtStyleDTO> shirtStyleDTOS;
 
-  StylingController() {
+  StylingController(Tracer tracer) throws IOException {
     String deliveryUrl = "http://localhost:50052";
-    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class);
+    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, tracer);
     shirtStyleDTOS = new ArrayList<>();
     ShirtStyleDTO dto = new ShirtStyleDTO();
     dto.setName("style1");
