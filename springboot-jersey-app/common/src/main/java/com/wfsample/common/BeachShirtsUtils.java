@@ -1,15 +1,18 @@
 package com.wfsample.common;
 
+import com.wavefront.sdk.jaxrs.client.ClientSpanDecorator;
+import com.wavefront.sdk.jaxrs.client.ClientTracingFilter;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -34,9 +37,11 @@ public final class BeachShirtsUtils {
 
     /**
      * TODO: Make sure context is propagated correctly so that emitted spans belong to the same trace.
-     * In order to achieve this, pass in WavefrontTracer to this method and uncomment the 2 lines below
+     * In order to achieve this, pass in WavefrontTracer to this method and uncomment the 4 lines below
      */
-    // ClientTracingFilter filter = new ClientTracingFilter(tracer, new ArrayList<>());
+    // List<ClientSpanDecorator> clientSpanDecoratorList = Arrays.asList(
+    //     ClientSpanDecorator.STANDARD_TAGS, ClientSpanDecorator.WF_PATH_OPERATION_NAME);
+    // ClientTracingFilter filter = new ClientTracingFilter(tracer, clientSpanDecoratorList);
     // resteasyClientBuilder.register(filter);
 
     ResteasyWebTarget target = resteasyClientBuilder.build().target(url);
