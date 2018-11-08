@@ -5,8 +5,10 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
 
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.java2d.CRenderer;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -35,9 +37,9 @@ public class ShoppingController {
   private final StylingApi stylingApi;
   private static Logger logger = LoggerFactory.getLogger(ShoppingService.class);
 
-  ShoppingController() {
+  ShoppingController(Tracer tracer) {
     String stylingUrl = "http://localhost:50051";
-    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class);
+    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, tracer);
   }
 
   @GET

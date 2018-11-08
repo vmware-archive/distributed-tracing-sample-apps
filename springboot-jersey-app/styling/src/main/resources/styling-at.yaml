@@ -1,0 +1,7 @@
+application: ajay-beachshirts
+cluster: local
+service: styling
+shard: primary
+customTags:
+  location: Palo-Alto
+  env: dev

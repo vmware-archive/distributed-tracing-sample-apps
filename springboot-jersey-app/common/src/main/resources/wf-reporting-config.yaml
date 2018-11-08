@@ -1,0 +1,6 @@
+# If you are using direct ingestion, then use the below configuration
+reportingMechanism: "direct"
+server: "https://tracing.wavefront.com/"
+token: "104c7c31-598d-46e2-9972-0fd6c1ec8285"
+source: "ajay-mac"
+reportTraces: true

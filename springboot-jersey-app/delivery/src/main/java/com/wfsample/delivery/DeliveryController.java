@@ -1,5 +1,9 @@
 package com.wfsample.delivery;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.DeltaCounter;
+import com.codahale.metrics.Gauge;
+import com.wfsample.common.BeachShirtsMetricRegistry;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.service.DeliveryApi;
@@ -24,12 +28,19 @@ import javax.ws.rs.core.Response;
  */
 @Component
 public class DeliveryController implements DeliveryApi {
-  /*
-   * TODO: Add a gauge to monitor the size of dispatch queue.
-   * Also, consider adding relevant ApplicationTags for this metric.
-   */
+
   private static Queue<PackedShirtsDTO> dispatchQueue;
+  private static final Gauge dispatchQueueSize = BeachShirtsMetricRegistry.METRIC_REGISTRY.register("delivery.queue.size", () -> dispatchQueue.size());
+
+  private final Counter ordersInvalid = BeachShirtsMetricRegistry.METRIC_REGISTRY.counter("delivery.dispatch.orders.invalid");
+  private final Counter ordersNoShirts = BeachShirtsMetricRegistry.METRIC_REGISTRY.counter("delivery.dispatch.orders.error");
+  private final Counter ordersRetrievedSuccess = BeachShirtsMetricRegistry.METRIC_REGISTRY.counter("delivery.retrieved.orders.success");
+  private final Counter ordersRetrievedError = BeachShirtsMetricRegistry.METRIC_REGISTRY.counter("delivery.retrieved.orders.error");
+
+  private final DeltaCounter shirtsDelivered = DeltaCounter.get(BeachShirtsMetricRegistry.METRIC_REGISTRY, "delivery.delivered.shirts");
+
   private static Logger logger = LoggerFactory.getLogger(DeliveryService.class);
+
 
   public DeliveryController() {
     dispatchQueue = new ConcurrentLinkedDeque<>();
@@ -43,18 +54,14 @@ public class DeliveryController implements DeliveryApi {
       return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
     }
     if (orderNum.isEmpty()) {
-      /*
-       * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
-       */
+      ordersInvalid.inc();
       String msg = "Invalid Order Num";
       logger.warn(msg);
       return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
     }
     if (packedShirts == null || packedShirts.getShirts() == null ||
         packedShirts.getShirts().size() == 0) {
-      /*
-       * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
-       */
+      ordersNoShirts.inc();
       String msg = "No shirts to deliver";
       logger.warn(msg);
       return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
@@ -75,25 +82,19 @@ public class DeliveryController implements DeliveryApi {
   }
 
   private void deliverPackedShirts(PackedShirtsDTO packedShirtsDTO) {
-    for (int i = 0; i < packedShirtsDTO.getShirts().size(); i++) {
-      /*
-      * TODO: Try to Increment a delta counter when shirts are delivered.
-      * Also, consider adding relevant ApplicationTags for this metric.
-      */
-    }
+    shirtsDelivered.inc(packedShirtsDTO.getShirts().size());
     System.out.println(packedShirtsDTO.getShirts().size() + " shirts delivered!");
   }
 
   @Override
   public Response retrieve(String orderNum) {
     if (orderNum.isEmpty()) {
-      /*
-       * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
-       */
+      ordersRetrievedError.inc();
       String msg = "Invalid Order Num";
       logger.warn(msg);
       return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
     }
+    ordersRetrievedSuccess.inc();
     return Response.ok("Order: " + orderNum + " returned").build();
   }
 }

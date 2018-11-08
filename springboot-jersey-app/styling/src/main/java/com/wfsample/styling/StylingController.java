@@ -1,5 +1,7 @@
 package com.wfsample.styling;
 
+import com.codahale.metrics.Histogram;
+import com.wfsample.common.BeachShirtsMetricRegistry;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.ShirtDTO;
@@ -8,6 +10,7 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +34,11 @@ public class StylingController implements StylingApi {
   private List<ShirtStyleDTO> shirtStyleDTOS;
   private static Logger logger = LoggerFactory.getLogger(StylingService.class);
 
-  StylingController() {
+  Histogram stylingQuantity = BeachShirtsMetricRegistry.METRIC_REGISTRY.histogram("styling.quantity");
+
+  StylingController(Tracer tracer) {
     String deliveryUrl = "http://localhost:50052";
-    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class);
+    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, tracer);
     shirtStyleDTOS = new ArrayList<>();
     ShirtStyleDTO dto = new ShirtStyleDTO();
     dto.setName("style1");
@@ -50,13 +55,8 @@ public class StylingController implements StylingApi {
   }
 
   public Response makeShirts(String id, int quantity) {
-    /*
-     * TODO: Try to report the value of quantity using WavefrontHistogram.
-     *
-     * Viewing the quantity requested by various clients as a minute distribution and then applying
-     * statistical functions (median, mean, min, max, p95, p99 etc.) on that data is really useful
-     * to understand the user trend.
-     */
+    stylingQuantity.update(quantity);
+
     if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
       String msg = "Failed to make shirts!";
       logger.warn(msg);
