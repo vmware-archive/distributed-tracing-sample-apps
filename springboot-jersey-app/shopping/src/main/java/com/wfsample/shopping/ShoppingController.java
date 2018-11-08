@@ -21,6 +21,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.opentracing.Tracer;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
@@ -35,9 +37,9 @@ public class ShoppingController {
   private final StylingApi stylingApi;
   private static Logger logger = LoggerFactory.getLogger(ShoppingService.class);
 
-  ShoppingController() {
+  ShoppingController(Tracer tracer) {
     String stylingUrl = "http://localhost:50051";
-    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class);
+    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, tracer);
   }
 
   @GET

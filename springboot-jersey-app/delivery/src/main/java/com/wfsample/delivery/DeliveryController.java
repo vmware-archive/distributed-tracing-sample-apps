@@ -1,5 +1,8 @@
 package com.wfsample.delivery;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.DeltaCounter;
+import com.codahale.metrics.Gauge;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.service.DeliveryApi;
@@ -16,6 +19,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.core.Response;
 
+import static com.wfsample.common.BeachShirtsUtils.METRIC_REGISTRY;
+
 /**
  * Controller for delivery service which is responsible for dispatching shirts returning tracking
  * number for a given order.
@@ -29,6 +34,11 @@ public class DeliveryController implements DeliveryApi {
    * Also, consider adding relevant ApplicationTags for this metric.
    */
   private static Queue<PackedShirtsDTO> dispatchQueue;
+  private static final Gauge<Integer> queuesize = METRIC_REGISTRY.register("delivery.queue_size", () -> dispatchQueue.size());
+  private final Counter invalidDispatchOrders = METRIC_REGISTRY.counter("delivery.dispatch.invalid_orders");
+  private final Counter invalidRetrieveOrders = METRIC_REGISTRY.counter("delivery.retrieve.invalid_orders");
+  private final Counter noShirts = METRIC_REGISTRY.counter("delivery.dispatch.no_shirts");
+  private final DeltaCounter delivered = DeltaCounter.get(METRIC_REGISTRY, "delivery.shirts_delivered");
   private static Logger logger = LoggerFactory.getLogger(DeliveryService.class);
 
   public DeliveryController() {
@@ -46,6 +56,7 @@ public class DeliveryController implements DeliveryApi {
       /*
        * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
        */
+      invalidDispatchOrders.inc();
       String msg = "Invalid Order Num";
       logger.warn(msg);
       return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
@@ -55,6 +66,7 @@ public class DeliveryController implements DeliveryApi {
       /*
        * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
        */
+      noShirts.inc();
       String msg = "No shirts to deliver";
       logger.warn(msg);
       return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
@@ -80,6 +92,7 @@ public class DeliveryController implements DeliveryApi {
       * TODO: Try to Increment a delta counter when shirts are delivered.
       * Also, consider adding relevant ApplicationTags for this metric.
       */
+      delivered.inc();
     }
     System.out.println(packedShirtsDTO.getShirts().size() + " shirts delivered!");
   }
@@ -90,6 +103,7 @@ public class DeliveryController implements DeliveryApi {
       /*
        * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
        */
+      invalidRetrieveOrders.inc();
       String msg = "Invalid Order Num";
       logger.warn(msg);
       return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();

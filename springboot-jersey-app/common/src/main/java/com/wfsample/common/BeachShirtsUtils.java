@@ -1,5 +1,9 @@
 package com.wfsample.common;
 
+import com.codahale.metrics.MetricRegistry;
+import com.wavefront.sdk.common.WavefrontSender;
+import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -11,6 +15,9 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import java.util.ArrayList;
 
+import io.opentracing.Tracer;
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFilter;
+
 
 /**
  * Utilities for use by the various beachshirts application related services.
@@ -19,10 +26,12 @@ import java.util.ArrayList;
  */
 public final class BeachShirtsUtils {
 
+  public static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
+
   private BeachShirtsUtils() {
   }
 
-  public static <T> T createProxyClient(String url, Class<T> clazz) {
+  public static <T> T createProxyClient(String url, Class<T> clazz, Tracer tracer) {
     HttpClient httpClient = HttpClientBuilder.create().setMaxConnTotal(2000).
             setMaxConnPerRoute(1000).build();
     ApacheHttpClient4Engine apacheHttpClient4Engine = new ApacheHttpClient4Engine(httpClient, true);
@@ -36,10 +45,16 @@ public final class BeachShirtsUtils {
      * TODO: Make sure context is propagated correctly so that emitted spans belong to the same trace.
      * In order to achieve this, pass in WavefrontTracer to this method and uncomment the 2 lines below
      */
-    // ClientTracingFilter filter = new ClientTracingFilter(tracer, new ArrayList<>());
-    // resteasyClientBuilder.register(filter);
+     ClientTracingFilter filter = new ClientTracingFilter(tracer, new ArrayList<>());
+     resteasyClientBuilder.register(filter);
 
     ResteasyWebTarget target = resteasyClientBuilder.build().target(url);
     return target.proxy(clazz);
+  }
+
+  public static WavefrontSender getSender() {
+    WavefrontDirectIngestionClient.Builder builder = new WavefrontDirectIngestionClient.Builder(
+        "https://tracing.wavefront.com", "104c7c31-598d-46e2-9972-0fd6c1ec8285");
+    return builder.build();
   }
 }
