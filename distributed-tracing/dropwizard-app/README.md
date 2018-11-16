@@ -5,7 +5,20 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
 
 ## Running Application locally 
 
-- Make sure Jaeger is running on your env using the [Docker image](https://www.jaegertracing.io/docs/getting-started).
+- Make sure Jaeger is running on your env using the [Docker image](https://www.jaegertracing.io/docs/getting-started):
+
+    ```bash
+    $ docker run -d --name jaeger \
+      -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
+      -p 5775:5775/udp \
+      -p 6831:6831/udp \
+      -p 6832:6832/udp \
+      -p 5778:5778 \
+      -p 16686:16686 \
+      -p 14268:14268 \
+      -p 9411:9411 \
+      jaegertracing/all-in-one:1.8
+    ```
 
 - Run `mvn clean install` from the root directory of the project.
 
@@ -18,7 +31,7 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
 
 - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which is added by us randomly.
 
-- Now go to Jaeger UI and look for traces for service "shopping" and click on Find Traces.
+- Now go to Jaeger UI (http://localhost:16686, if you're using all-in-one docker image as given above) and look for traces for service "shopping" and click on Find Traces.
 
 ## Change from Jaeger to Wavefront
 
