@@ -2,6 +2,7 @@ package com.wfsample.styling;
 
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
+import com.wfsample.common.Tracing;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.ShirtDTO;
 import com.wfsample.common.dto.ShirtStyleDTO;
@@ -17,10 +18,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
+import io.opentracing.Scope;
+import io.opentracing.Tracer;
 
 import static java.util.stream.Collectors.toList;
 
@@ -33,11 +37,15 @@ import static java.util.stream.Collectors.toList;
 public class StylingService extends Application<DropwizardServiceConfig> {
   private static Logger logger = LoggerFactory.getLogger(StylingService.class);
 
-  private StylingService() {
+  private final Tracer tracer;
+
+  private StylingService(Tracer tracer) {
+    this.tracer = tracer;
   }
 
   public static void main(String[] args) throws Exception {
-    new StylingService().run(args);
+    Tracer tracer = Tracing.init("styling");
+    new StylingService(tracer).run(args);
   }
 
   @Override
@@ -45,7 +53,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
     String deliveryUrl = "http://" + configuration.getDeliveryHost() + ":" + configuration
         .getDeliveryPort();
     environment.jersey().register(new StylingWebResource(
-        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class)));
+        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, this.tracer)));
   }
 
   public class StylingWebResource implements StylingApi {
@@ -65,40 +73,47 @@ public class StylingService extends Application<DropwizardServiceConfig> {
       shirtStyleDTOS.add(dto2);
     }
 
-    public List<ShirtStyleDTO> getAllStyles() {
-      return shirtStyleDTOS;
+    @Override
+    public List<ShirtStyleDTO> getAllStyles(HttpHeaders httpHeaders) {
+      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "getAllStyles")) {
+        return shirtStyleDTOS;
+      }
     }
 
-    public Response makeShirts(String id, int quantity) {
-      /*
-       * TODO: Try to report the value of quantity using WavefrontHistogram.
-       * Important: Make sure you are sending to Minute bin instead of Hour or Day bin!
-       *
-       * Viewing the quantity requested by various clients as a minute distribution and then
-       * applying statistical functions (median, mean, min, max, p95, p99 etc.) on that data is
-       * really useful to understand the user trend.
-       */
-      if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
-        String msg = "Failed to make shirts!";
-        logger.warn(msg);
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
-      }
-      String orderNum = UUID.randomUUID().toString();
-      List<ShirtDTO> packedShirts = new ArrayList<>();
-      for (int i = 0; i < quantity; i++) {
-        packedShirts.add(new ShirtDTO(new ShirtStyleDTO(id, id + "Image")));
-      }
-      PackedShirtsDTO packedShirtsDTO = new PackedShirtsDTO(packedShirts.stream().
-          map(shirt -> new ShirtDTO(
-              new ShirtStyleDTO(shirt.getStyle().getName(), shirt.getStyle().getImageUrl()))).
-          collect(toList()));
-      Response deliveryResponse = deliveryApi.dispatch(orderNum, packedShirtsDTO);
-      if (deliveryResponse.getStatus() < 400) {
-        return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
-      } else {
-        String msg = "Failed to make shirts!";
-        logger.warn(msg);
-        return Response.status(deliveryResponse.getStatus()).entity(msg).build();
+    @Override
+    public Response makeShirts(String id, int quantity, HttpHeaders httpHeaders) {
+      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "makeShirts")) {
+
+        /*
+         * TODO: Try to report the value of quantity using WavefrontHistogram.
+         * Important: Make sure you are sending to Minute bin instead of Hour or Day bin!
+         *
+         * Viewing the quantity requested by various clients as a minute distribution and then
+         * applying statistical functions (median, mean, min, max, p95, p99 etc.) on that data is
+         * really useful to understand the user trend.
+         */
+        if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
+          String msg = "Failed to make shirts!";
+          logger.warn(msg);
+          return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
+        }
+        String orderNum = UUID.randomUUID().toString();
+        List<ShirtDTO> packedShirts = new ArrayList<>();
+        for (int i = 0; i < quantity; i++) {
+          packedShirts.add(new ShirtDTO(new ShirtStyleDTO(id, id + "Image")));
+        }
+        PackedShirtsDTO packedShirtsDTO = new PackedShirtsDTO(packedShirts.stream().
+            map(shirt -> new ShirtDTO(
+                new ShirtStyleDTO(shirt.getStyle().getName(), shirt.getStyle().getImageUrl()))).
+            collect(toList()));
+        Response deliveryResponse = deliveryApi.dispatch(orderNum, packedShirtsDTO, httpHeaders);
+        if (deliveryResponse.getStatus() < 400) {
+          return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
+        } else {
+          String msg = "Failed to make shirts!";
+          logger.warn(msg);
+          return Response.status(deliveryResponse.getStatus()).entity(msg).build();
+        }
       }
     }
   }

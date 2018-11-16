@@ -1,6 +1,7 @@
 package com.wfsample.delivery;
 
 import com.wfsample.common.DropwizardServiceConfig;
+import com.wfsample.common.Tracing;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
@@ -15,11 +16,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.dropwizard.Application;
 import io.dropwizard.lifecycle.setup.ScheduledExecutorServiceBuilder;
 import io.dropwizard.setup.Environment;
+import io.opentracing.Scope;
+import io.opentracing.Tracer;
+import okhttp3.OkHttpClient;
 
 /**
  * Driver for styling service which manages different styles of shirts and takes orders for a shirts
@@ -35,11 +40,15 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
   private static Queue<PackedShirtsDTO> dispatchQueue;
   private static Logger logger = LoggerFactory.getLogger(DeliveryService.class);
 
-  private DeliveryService() {
+  private final Tracer tracer;
+
+  private DeliveryService(Tracer tracer) {
+    this.tracer = tracer;
   }
 
   public static void main(String[] args) throws Exception {
-    new DeliveryService().run(args);
+    Tracer tracer = Tracing.init("delivery");
+    new DeliveryService(tracer).run(args);
   }
 
   @Override
@@ -79,53 +88,57 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
     }
 
     @Override
-    public Response dispatch(String orderNum, PackedShirtsDTO packedShirts) {
-      if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
-        String msg = "Failed to dispatch shirts!";
-        logger.warn(msg);
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
+    public Response dispatch(String orderNum, PackedShirtsDTO packedShirts, HttpHeaders httpHeaders) {
+      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "dispatch")) {
+        if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
+          String msg = "Failed to dispatch shirts!";
+          logger.warn(msg);
+          return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
+        }
+        if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
+          orderNum = "";
+        }
+        if (orderNum.isEmpty()) {
+          /*
+           * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
+           */
+          String msg = "Invalid Order Num";
+          logger.warn(msg);
+          return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+        if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
+          packedShirts = null;
+        }
+        if (packedShirts == null || packedShirts.getShirts() == null ||
+            packedShirts.getShirts().size() == 0) {
+          /*
+           * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
+           */
+          String msg = "No shirts to deliver";
+          logger.warn(msg);
+          return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+        dispatchQueue.add(packedShirts);
+        String trackingNum = UUID.randomUUID().toString();
+        System.out.println("Tracking number of Order:" + orderNum + " is " + trackingNum);
+        return Response.ok(new DeliveryStatusDTO(orderNum, trackingNum,
+            "shirts delivery dispatched")).build();
       }
-      if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
-        orderNum = "";
-      }
-      if (orderNum.isEmpty()) {
-        /*
-         * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
-         */
-        String msg = "Invalid Order Num";
-        logger.warn(msg);
-        return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-      }
-      if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
-        packedShirts = null;
-      }
-      if (packedShirts == null || packedShirts.getShirts() == null ||
-          packedShirts.getShirts().size() == 0) {
-        /*
-         * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
-         */
-        String msg = "No shirts to deliver";
-        logger.warn(msg);
-        return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-      }
-      dispatchQueue.add(packedShirts);
-      String trackingNum = UUID.randomUUID().toString();
-      System.out.println("Tracking number of Order:" + orderNum + " is " + trackingNum);
-      return Response.ok(new DeliveryStatusDTO(orderNum, trackingNum,
-          "shirts delivery dispatched")).build();
     }
 
     @Override
-    public Response retrieve(String orderNum) {
-      if (orderNum.isEmpty()) {
-        /*
-         * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
-         */
-        String msg = "Invalid Order Num";
-        logger.warn(msg);
-        return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+    public Response retrieve(String orderNum, HttpHeaders httpHeaders) {
+      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "retrieve")) {
+        if (orderNum.isEmpty()) {
+          /*
+           * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
+           */
+          String msg = "Invalid Order Num";
+          logger.warn(msg);
+          return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+        return Response.ok("Order: " + orderNum + " returned").build();
       }
-      return Response.ok("Order: " + orderNum + " returned").build();
     }
   }
 }
