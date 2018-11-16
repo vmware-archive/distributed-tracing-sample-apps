@@ -55,7 +55,6 @@ public final class Tracing {
     } catch (IllegalArgumentException e) {
       spanBuilder = tracer.buildSpan(operationName);
     }
-    // TODO could add more tags like http.url
     return spanBuilder.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER).startActive(true);
   }
 

@@ -24,7 +24,6 @@ import io.dropwizard.lifecycle.setup.ScheduledExecutorServiceBuilder;
 import io.dropwizard.setup.Environment;
 import io.opentracing.Scope;
 import io.opentracing.Tracer;
-import okhttp3.OkHttpClient;
 
 /**
  * Driver for styling service which manages different styles of shirts and takes orders for a shirts
@@ -33,10 +32,6 @@ import okhttp3.OkHttpClient;
  * @author Srujan Narkedamalli (snarkedamall@wavefront.com).
  */
 public class DeliveryService extends Application<DropwizardServiceConfig> {
-  /*
-   * TODO: Add a gauge to monitor the size of dispatch queue.
-   * Also, consider adding relevant ApplicationTags for this metric.
-   */
   private static Queue<PackedShirtsDTO> dispatchQueue;
   private static Logger logger = LoggerFactory.getLogger(DeliveryService.class);
 
@@ -72,12 +67,6 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
     }
 
     private void deliverPackedShirts(PackedShirtsDTO packedShirtsDTO) {
-      for (int i = 0; i < packedShirtsDTO.getShirts().size(); i++) {
-        /*
-         * TODO: Try to Increment a delta counter when shirts are delivered.
-         * Also, consider adding relevant ApplicationTags for this metric.
-         */
-      }
       System.out.println(packedShirtsDTO.getShirts().size() + " shirts delivered!");
     }
   }
@@ -99,9 +88,6 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
           orderNum = "";
         }
         if (orderNum.isEmpty()) {
-          /*
-           * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
-           */
           String msg = "Invalid Order Num";
           logger.warn(msg);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
@@ -111,9 +97,6 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         }
         if (packedShirts == null || packedShirts.getShirts() == null ||
             packedShirts.getShirts().size() == 0) {
-          /*
-           * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
-           */
           String msg = "No shirts to deliver";
           logger.warn(msg);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
@@ -130,9 +113,6 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
     public Response retrieve(String orderNum, HttpHeaders httpHeaders) {
       try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "retrieve")) {
         if (orderNum.isEmpty()) {
-          /*
-           * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.
-           */
           String msg = "Invalid Order Num";
           logger.warn(msg);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
