@@ -83,15 +83,6 @@ public class StylingService extends Application<DropwizardServiceConfig> {
     @Override
     public Response makeShirts(String id, int quantity, HttpHeaders httpHeaders) {
       try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "makeShirts")) {
-
-        /*
-         * TODO: Try to report the value of quantity using WavefrontHistogram.
-         * Important: Make sure you are sending to Minute bin instead of Hour or Day bin!
-         *
-         * Viewing the quantity requested by various clients as a minute distribution and then
-         * applying statistical functions (median, mean, min, max, p95, p99 etc.) on that data is
-         * really useful to understand the user trend.
-         */
         if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
           String msg = "Failed to make shirts!";
           logger.warn(msg);
