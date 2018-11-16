@@ -12,7 +12,7 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,8 +34,7 @@ public final class BeachShirtsUtils {
 
     ResteasyClientBuilder resteasyClientBuilder = new ResteasyClientBuilder().
         httpEngine(apacheHttpClient4Engine).providerFactory(factory);
-    List<ClientSpanDecorator> decoratorList = Arrays.asList(ClientSpanDecorator.STANDARD_TAGS,
-        ClientSpanDecorator.HTTP_PATH_OPERATION_NAME);
+    List<ClientSpanDecorator> decoratorList = Collections.singletonList(ClientSpanDecorator.STANDARD_TAGS);
     ClientTracingFilter filter = new ClientTracingFilter(tracer, decoratorList);
     resteasyClientBuilder.register(filter);
 
