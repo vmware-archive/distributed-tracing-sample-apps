@@ -57,7 +57,13 @@ public static Tracer init(String service) throws IOException {
     WavefrontProxyClient.Builder wfProxyClientBuilder = new WavefrontProxyClient.
         Builder("localhost").metricsPort(2878).tracingPort(30000);
     WavefrontSender wavefrontSender = wfProxyClientBuilder.build();
-    ApplicationTags applicationTags = new ApplicationTags.Builder("beachshirts",
+    /**
+     * TODO: You need to assign your microservices application a name.
+     * The name of the application is "beachshirts".
+     * For this hackathon, please prepend your name to this application,
+     * for example: applicationName = "sushant-beachshirts"
+     */
+    ApplicationTags applicationTags = new ApplicationTags.Builder(applicationName,
         service).build();
     Reporter wfSpanReporter = new WavefrontSpanReporter.Builder().
         withSource("wavefront-tracing-example").build(wavefrontSender);
