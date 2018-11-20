@@ -2,11 +2,6 @@
 
 This is a sample Java application using Dropwizard called beachshirts (#[beachops](https://medium.com/@matthewzeier/thoughts-from-an-operations-wrangler-how-we-use-alerts-to-monitor-wavefront-71329c5e57a8)) which makes cool shirts for the beach.
 
-## Requirements
-1. Java >= 1.8
-2. Wavefront proxy >= v4.32: See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for installation details.
-3. Enable `traceListenerPorts` on the Wavefront proxy configuration: See [here](https://docs.wavefront.com/proxies_configuring.html#proxy-configuration-properties) for details.
-
 ## Running the Application Locally
 
 1. Run Jaeger in your env using the [Docker image](https://www.jaegertracing.io/docs/getting-started):
@@ -49,8 +44,11 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
   </dependency>
 ```
 
-2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.32.
-See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
+2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.32:
+   * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
+   * Enable `traceListenerPorts` on the Wavefront proxy configuration: See [here](https://docs.wavefront.com/proxies_configuring.html#proxy-configuration-properties) for details.
+
+      **Note**: You need to use the same tracing port (for example: `30000`) when you instantiate the `WavefrontProxyClient` (see below).
 
 3. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `com.uber.jaeger.Tracer` as follows:
 
