@@ -44,7 +44,10 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
   </dependency>
 ```
 
-1. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `com.uber.jaeger.Tracer` as follows:
+2. If you sending the tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.32
+You can find the latest proxy release [here](https://packagecloud.io/wavefront/proxy)
+
+3. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `com.uber.jaeger.Tracer` as follows:
 
 ```java
 public static Tracer init(String service) throws IOException {
@@ -61,4 +64,4 @@ public static Tracer init(String service) throws IOException {
 }
 ```
 
-Now all the tracing data should be sent to Wavefront.
+4. Now all the tracing data should be sent to Wavefront. Go to the UI and click on Browse -> Traces
