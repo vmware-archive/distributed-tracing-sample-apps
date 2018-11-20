@@ -45,7 +45,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 ```
 
 2. If you sending the tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.32
-You can find the latest proxy release here - https://packagecloud.io/wavefront/proxy
+You can find the latest proxy release [here](https://packagecloud.io/wavefront/proxy)
 
 3. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `com.uber.jaeger.Tracer` as follows:
 
