@@ -59,9 +59,8 @@ public static Tracer init(String service) throws IOException {
     WavefrontSender wavefrontSender = wfProxyClientBuilder.build();
     /**
      * TODO: You need to assign your microservices application a name.
-     * The name of the application is "beachshirts".
-     * For this hackathon, please prepend your name to this application,
-     * for example: applicationName = "sushant-beachshirts"
+     * For this hackathon, please prepend your name (example: "john") to the beachshirts application,
+     * for example: applicationName = "john-beachshirts"
      */
     ApplicationTags applicationTags = new ApplicationTags.Builder(applicationName,
         service).build();
