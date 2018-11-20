@@ -5,7 +5,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 ## Requirements
 1. Java >= 1.8
 2. Wavefront proxy >= v4.32: See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for installation details.
-3. Enable `traceListenerPorts` on the Wavefront proxy configuration: See [here](https://docs.wavefront.com/proxies_configuring.html#general-proxy-properties-and-examples) for details.
+3. Enable `traceListenerPorts` on the Wavefront proxy configuration: See [here](https://docs.wavefront.com/proxies_configuring.html#proxy-configuration-properties) for details.
 
 ## Running the Application Locally
 
