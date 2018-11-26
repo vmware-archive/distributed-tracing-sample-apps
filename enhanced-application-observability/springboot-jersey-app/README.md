@@ -123,9 +123,8 @@ Click [here](https://github.com/wavefrontHQ/wavefront-jersey-sdk-java/blob/maste
 We will rely on [WavefrontJaxrsClientFilter](https://github.com/wavefrontHQ/wavefront-jaxrs-sdk-java#wavefrontjaxrsclientfilter) to do this.
 
 You need to pass WavefrontJaxrsClientFilter that was instantiated in the step 4 above to `BeachShirtsUtils.createProxyClient` method in -
-6a. [ShoppingController](https://github.com/wavefrontHQ/hackathon/blob/master/enhanced-application-observability/springboot-jersey-app/shopping/src/main/java/com/wfsample/shopping/ShoppingController.java)
-
-6b. [StylingController](https://github.com/wavefrontHQ/hackathon/blob/master/enhanced-application-observability/springboot-jersey-app/styling/src/main/java/com/wfsample/styling/StylingController.java)
+   * [ShoppingController](https://github.com/wavefrontHQ/hackathon/blob/master/enhanced-application-observability/springboot-jersey-app/shopping/src/main/java/com/wfsample/shopping/ShoppingController.java)
+   * [StylingController](https://github.com/wavefrontHQ/hackathon/blob/master/enhanced-application-observability/springboot-jersey-app/styling/src/main/java/com/wfsample/styling/StylingController.java)
 
 7. After making all the code changes, run `mvn clean install` from the root directory of the project.
 
@@ -141,4 +140,4 @@ You need to pass WavefrontJaxrsClientFilter that was instantiated in the step 4 
 
 10. Now all the metrics, histograms and traces should be sent to Wavefront. Go to the UI and click on Browse -> Applications.
 
-(Optional) Custom Business Metrics - There are several `#TODO` in the code to address the custom business metrics. Once those TODOs are completed using the [Wavefront Dropwizard Metrics SDK](https://github.com/wavefrontHQ/wavefront-dropwizard-metrics-sdk-java), you can view those metrics on the Wavefront UI.
+  * (Optional) Custom Business Metrics - There are several `#TODO` in the code to address the custom business metrics. Once those TODOs are completed using the [Wavefront Dropwizard Metrics SDK](https://github.com/wavefrontHQ/wavefront-dropwizard-metrics-sdk-java), you can view those metrics on the Wavefront UI.
