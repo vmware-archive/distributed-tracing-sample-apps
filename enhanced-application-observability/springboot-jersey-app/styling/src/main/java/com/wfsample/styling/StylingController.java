@@ -1,5 +1,6 @@
 package com.wfsample.styling;
 
+import com.wavefront.sdk.jaxrs.client.WavefrontJaxrsClientFilter;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.ShirtDTO;
@@ -33,8 +34,9 @@ public class StylingController implements StylingApi {
 
   StylingController() {
     String deliveryUrl = "http://localhost:50052";
-    // TODO: Initialize WavefrontJaxrsFilter in JerseyConfig and pass it into createProxyClient().
-    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, null);
+    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
+    // TODO: Initialize WavefrontJaxrsFilter in JerseyConfig and assign it to wavefrontJaxrsFilter.
+    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, wavefrontJaxrsFilter);
     shirtStyleDTOS = new ArrayList<>();
     ShirtStyleDTO dto = new ShirtStyleDTO();
     dto.setName("style1");

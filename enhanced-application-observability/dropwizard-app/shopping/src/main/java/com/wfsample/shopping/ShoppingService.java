@@ -1,5 +1,6 @@
 package com.wfsample.shopping;
 
+import com.wavefront.sdk.jaxrs.client.WavefrontJaxrsClientFilter;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
 import com.wfsample.common.dto.DeliveryStatusDTO;
@@ -46,9 +47,10 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
   public void run(DropwizardServiceConfig configuration, Environment environment) {
     String stylingUrl = "http://" + configuration.getStylingHost() + ":" + configuration
         .getStylingPort();
-    // TODO: Initialize WavefrontJaxrsFilter and pass it into createProxyClient().
+    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
+    // TODO: Initialize WavefrontJaxrsFilter here.
     environment.jersey().register(new ShoppingWebResource(
-        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, null)));
+        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, wavefrontJaxrsFilter)));
   }
 
   @Path("/shop")
