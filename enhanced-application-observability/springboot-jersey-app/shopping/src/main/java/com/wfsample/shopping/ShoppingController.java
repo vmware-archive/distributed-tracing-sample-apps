@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -37,7 +36,8 @@ public class ShoppingController {
 
   ShoppingController() {
     String stylingUrl = "http://localhost:50051";
-    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class);
+    // TODO: Initialize WavefrontJaxrsFilter in JerseyConfig and pass it into createProxyClient().
+    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, null);
   }
 
   @GET

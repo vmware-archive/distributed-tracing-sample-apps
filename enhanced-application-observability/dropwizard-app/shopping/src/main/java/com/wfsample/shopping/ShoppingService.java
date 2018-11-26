@@ -46,8 +46,9 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
   public void run(DropwizardServiceConfig configuration, Environment environment) {
     String stylingUrl = "http://" + configuration.getStylingHost() + ":" + configuration
         .getStylingPort();
+    // TODO: Initialize WavefrontJaxrsFilter and pass it into createProxyClient().
     environment.jersey().register(new ShoppingWebResource(
-        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class)));
+        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, null)));
   }
 
   @Path("/shop")

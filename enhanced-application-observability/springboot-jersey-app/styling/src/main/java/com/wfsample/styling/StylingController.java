@@ -33,7 +33,8 @@ public class StylingController implements StylingApi {
 
   StylingController() {
     String deliveryUrl = "http://localhost:50052";
-    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class);
+    // TODO: Initialize WavefrontJaxrsFilter in JerseyConfig and pass it into createProxyClient().
+    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, null);
     shirtStyleDTOS = new ArrayList<>();
     ShirtStyleDTO dto = new ShirtStyleDTO();
     dto.setName("style1");

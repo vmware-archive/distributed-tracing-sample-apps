@@ -44,8 +44,9 @@ public class StylingService extends Application<DropwizardServiceConfig> {
   public void run(DropwizardServiceConfig configuration, Environment environment) {
     String deliveryUrl = "http://" + configuration.getDeliveryHost() + ":" + configuration
         .getDeliveryPort();
+    // TODO: Initialize WavefrontJaxrsFilter and pass it into createProxyClient().
     environment.jersey().register(new StylingWebResource(
-        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class)));
+        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, null)));
   }
 
   public class StylingWebResource implements StylingApi {
