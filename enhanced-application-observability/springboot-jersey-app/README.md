@@ -26,7 +26,7 @@ which makes shirts for the beach.
 
 - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds
 
-## Enhanced Application Observability setup
+## 3D Microservices Observability (Out of the box metrics, histograms and traces) setup
 
 In order to instrument your application to emit out of the box metrics, histograms and traces follow the steps listed below.
 
