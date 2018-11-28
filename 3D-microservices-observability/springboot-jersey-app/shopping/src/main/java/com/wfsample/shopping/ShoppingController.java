@@ -38,7 +38,11 @@ public class ShoppingController {
   ShoppingController() {
     String stylingUrl = "http://localhost:50051";
     WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
-    // TODO: Initialize WavefrontJaxrsFilter in JerseyConfig and assign it to wavefrontJaxrsFilter.
+    /**
+     * TODO: Initialize WavefrontJaxrsClientFilter in JerseyConfig.java, add an argument of it in
+     * the constructor as well and uncomment the following line to use it.
+     */
+    // wavefrontJaxrsFilter = wfJaxrsClientFilter;
     this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, wavefrontJaxrsFilter);
   }
 

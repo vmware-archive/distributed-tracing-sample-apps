@@ -35,7 +35,11 @@ public class StylingController implements StylingApi {
   StylingController() {
     String deliveryUrl = "http://localhost:50052";
     WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
-    // TODO: Initialize WavefrontJaxrsFilter in JerseyConfig and assign it to wavefrontJaxrsFilter.
+    /**
+     * TODO: Initialize WavefrontJaxrsClientFilter in JerseyConfig.java, add an argument of it in
+     * the constructor as well and uncomment the following line to use it.
+     */
+    // wavefrontJaxrsFilter = wfJaxrsClientFilter;
     this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, wavefrontJaxrsFilter);
     shirtStyleDTOS = new ArrayList<>();
     ShirtStyleDTO dto = new ShirtStyleDTO();
