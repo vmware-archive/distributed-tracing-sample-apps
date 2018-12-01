@@ -1,0 +1,70 @@
+version: '2'
+
+services:
+  shopping_service:
+    image: beachshirts-shopping:latest
+    build:
+      dockerfile: Dockerfile
+      context: ./shopping
+    command: bash -c "python3 ./shopping/manage.py runserver 0.0.0.0:50050"
+    volumes:
+      - .:/code
+    ports:
+      - 50050:50050
+    restart: always
+    links:
+      - styling_service
+
+  styling_service:
+    image: beachshirts-styling:latest
+    build:
+      dockerfile: Dockerfile
+      context: ./styling
+    command: bash -c "python3 ./styling/manage.py runserver 0.0.0.0:50051"
+    volumes:
+      - .:/code
+    ports:
+      - 50051:50051
+    restart: always
+    links:
+      - printing_service
+      - packaging_service
+
+  printing_service:
+    image: beachshirts-printing:latest
+    build:
+      dockerfile: Dockerfile
+      context: ./printing
+    command: bash -c "python3 ./printing/printing_server.py"
+    volumes:
+      - .:/code
+    ports:
+      - 50052:50052
+    restart: always
+
+  packaging_service:
+    image: beachshirts-packaging:latest
+    build:
+      dockerfile: Dockerfile
+      context: ./packaging
+    command: bash -c "python3 ./packaging/packaging_server.py"
+    volumes:
+      - .:/code
+    ports:
+      - 50053:50053
+    restart: always
+
+#  nginx:
+#    build: ./web
+#    ports:
+#      - 80:80
+#    links:
+#      - shopping_service
+#      - styling_service
+#      - printing_service
+#      - packaging_service
+#    depends_on:
+#      - shopping_service
+#      - styling_service
+#      - printing_service
+#      - packaging_service
