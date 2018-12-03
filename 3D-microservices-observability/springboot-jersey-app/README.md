@@ -5,6 +5,12 @@ which makes shirts for the beach.
 
 ## Running Application locally 
 
+- `git clone` this repo and naviagete to this dir:
+
+- ```bash
+  git clone https://github.com/wavefrontHQ/hackathon.git
+  cd hackathon/3D-microservices-observability/springboot-jersey-app
+  ```
 - Run `mvn clean install` from the root directory of the project.
 
 - Now run all the services using below commands from root directory of the project.
@@ -30,14 +36,18 @@ which makes shirts for the beach.
 
 In order to instrument your application to emit out of the box metrics, histograms and traces follow the steps listed below.
 
-1. Add following dependency - `Wavefront Jersey SDK`
+1. Add following dependency of `Wavefront Jersey SDK` to the `pom.xml`
 
 ```xml
+<dependencies>
+  ...
   <dependency>
     <groupId>com.wavefront</groupId>
     <artifactId>wavefront-jersey-sdk-java</artifactId>
     <version>0.9.0</version>
   </dependency>
+  ...
+</dependencies> 
 ```
 
 2. If you are sending data to Wavefront via Proxy, then make sure you are using proxy version >= v4.32:
@@ -46,7 +56,7 @@ In order to instrument your application to emit out of the box metrics, histogra
 
       **Note**: You need to use the same histogram port (for example: `40000`) and the same tracing port (for example: `30000`) when you instantiate the `WavefrontProxyClient` (see below).
 
-   * Command for running in Wavefront Proxy in Docker:
+   * Command for running in Wavefront Proxy in [Docker](https://docs.docker.com/install/):
 
    ```bash
    docker run -d \
@@ -61,7 +71,10 @@ In order to instrument your application to emit out of the box metrics, histogra
        wavefronthq/proxy:latest
    ```
 
-3. Your sample app has 3 microservices - `shopping`, `styling` and `delivery`.
+3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
+
+4. Your sample app has 3 microservices - `shopping`, `styling` and `delivery`.
+
    * You need to define ApplicationTags for all the 3 microservices. ApplicationTags are composed of application name and service name. Optionally, you can also define the cluster in which the service is running along with what shard it is running on. You can also define optional custom tags.
 
   * shopping yaml file - `springboot-jersey-app/shopping/src/main/resources/shopping.yaml`
@@ -165,7 +178,7 @@ ShoppingController(WavefrontJaxrsClientFilter wfJaxrsClientFilter) {
 
 7. After making all the code changes, run `mvn clean install` from the root directory of the project.
 
-8. Now run all the services using below commands from root directory of the project.
+8. Now restart all the services again using below commands from root directory of the project.
 
   ```bash
   java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar

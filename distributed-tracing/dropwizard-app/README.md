@@ -19,9 +19,16 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
      jaegertracing/all-in-one:1.8
    ```
 
-2. Run `mvn clean install` from the root directory of the project.
+2. `git clone` this repo and naviagete to this dir:
 
-3. Now run all the services using the commands below:
+3. ```bash
+   git clone https://github.com/wavefrontHQ/hackathon.git
+   cd hackathon/distributed-tracing/dropwizard-app
+   ```
+
+4. Run `mvn clean install` from the root directory of the project.
+
+5. Now run all the services using the commands below:
 
    ```bash
    java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar server ./shopping/app.yaml
@@ -34,23 +41,45 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 
 ## Change from Jaeger to Wavefront
 
-1. Add dependency of `Wavefront Opentracing SDK`:
+1. Add dependency of `Wavefront Opentracing SDK` to the `pom.xml`:
 
 ```xml
+<dependencies>
+  ...
   <dependency>
     <groupId>com.wavefront</groupId>
     <artifactId>wavefront-opentracing-sdk-java</artifactId>
     <version>0.9.1</version>
   </dependency>
+  ...
+</dependencies> 
 ```
 
 2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.32:
    * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
+
    * Enable `traceListenerPorts` on the Wavefront proxy configuration: See [here](https://docs.wavefront.com/proxies_configuring.html#proxy-configuration-properties) for details.
 
       **Note**: You need to use the same tracing port (for example: `30000`) when you instantiate the `WavefrontProxyClient` (see below).
 
-3. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `com.uber.jaeger.Tracer` as follows:
+   * You can use following command to run Wavefront proxy in docker:
+
+   * ```bash
+      docker run -d \
+          -e WAVEFRONT_URL=https://{CLUSTER}.wavefront.com/api/ \
+          -e WAVEFRONT_TOKEN={TOKEN} \
+          -e JAVA_HEAP_USAGE=512m \
+          -e WAVEFRONT_PROXY_ARGS="--traceListenerPorts 30000 --histogramDistListenerPorts 40000" \
+          -p 2878:2878 \
+          -p 4242:4242 \
+          -p 30000:30000 \
+          -p 40000:40000 \
+          wavefronthq/proxy:latest
+      ```
+
+3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
+
+4. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `com.uber.jaeger.Tracer` as follows:
 
 ```java
 public static Tracer init(String service) throws IOException {
