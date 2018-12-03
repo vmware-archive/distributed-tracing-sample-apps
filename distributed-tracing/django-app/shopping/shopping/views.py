@@ -43,7 +43,6 @@ def order_shirts(request):
             return Response(status=res.status_code)
     else:
         return Response("Missing field!", status=400)
-    pass
 
 
 def inject_as_headers(tracer, request, headers):

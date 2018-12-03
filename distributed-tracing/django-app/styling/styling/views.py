@@ -6,6 +6,9 @@ import requests
 import opentracing
 import six
 import uuid
+import json
+
+tracer = settings.OPENTRACING_TRACER
 
 all_styles = [
     {
@@ -16,8 +19,6 @@ all_styles = [
         "name": "BeachOps",
         "url": "BeachOpsURL"
     }]
-
-tracer = settings.OPENTRACING_TRACER
 
 
 @tracer.trace()
@@ -30,11 +31,12 @@ def get_all_styles(request):
 @api_view(http_method_names=["GET"])
 def make_shirts(request, id):
     quantity = int(request.GET.get('quantity', None))
-    shirts = []
+    shirts = {'shirts': ["abc", "cde"]}
+    order_num = str(uuid.uuid4())
     headers = {'host': 'localhost'}
     inject_as_headers(tracer, request, headers)
-    res = requests.get("http://localhost:50052/dispatch/" + str(uuid.uuid4()),
-                       headers=headers)
+    res = requests.post("http://localhost:50052/dispatch/" + order_num,
+                        headers=headers, data=shirts)
     return Response({"status": "completed"}, status=200)
 
 

@@ -1,7 +1,0 @@
-six
-requests
-Django>=2.0.0
-djangorestframework>=3.0,<4.0
-opentracing<2.0
-django_opentracing<1.0.0
-jaeger_client==3.12.0
