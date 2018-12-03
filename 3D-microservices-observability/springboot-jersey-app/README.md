@@ -5,7 +5,7 @@ which makes shirts for the beach.
 
 ## Running Application locally 
 
-- `git clone` this repo and naviagete to this dir:
+- `git clone` this repo and navigate to this dir:
 
 - ```bash
   git clone https://github.com/wavefrontHQ/hackathon.git

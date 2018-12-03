@@ -19,7 +19,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
      jaegertracing/all-in-one:1.8
    ```
 
-2. `git clone` this repo and naviagete to this dir:
+2. `git clone` this repo and navigate to this dir:
 
 3. ```bash
    git clone https://github.com/wavefrontHQ/hackathon.git
