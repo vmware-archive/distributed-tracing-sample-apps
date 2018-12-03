@@ -43,20 +43,21 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 
 1. Add dependency of `Wavefront Opentracing SDK` to the `pom.xml`:
 
-```xml
-<dependencies>
-  ...
-  <dependency>
-    <groupId>com.wavefront</groupId>
-    <artifactId>wavefront-opentracing-sdk-java</artifactId>
-    <version>0.9.1</version>
-  </dependency>
-  ...
-</dependencies> 
-```
+2. ```xml
+   <dependencies>
+     ...
+     <dependency>
+       <groupId>com.wavefront</groupId>
+       <artifactId>wavefront-opentracing-sdk-java</artifactId>
+       <version>0.9.1</version>
+     </dependency>
+     ...
+   </dependencies> 
+   ```
 
-2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.32:
-   * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
+   If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.32:
+
+3. * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
    * Enable `traceListenerPorts` on the Wavefront proxy configuration: See [here](https://docs.wavefront.com/proxies_configuring.html#proxy-configuration-properties) for details.
 
@@ -77,28 +78,39 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
           wavefronthq/proxy:latest
       ```
 
-3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
+4. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
-4. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `com.uber.jaeger.Tracer` as follows:
+5. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `com.uber.jaeger.Tracer` as follows:
 
-```java
-public static Tracer init(String service) throws IOException {
-    WavefrontProxyClient.Builder wfProxyClientBuilder = new WavefrontProxyClient.
-        Builder("localhost").metricsPort(2878).tracingPort(30000);
-    WavefrontSender wavefrontSender = wfProxyClientBuilder.build();
-    /**
-     * TODO: You need to assign your microservices application a name.
-     * For this hackathon, please prepend your name (example: "john") to the beachshirts application,
-     * for example: applicationName = "john-beachshirts"
-     */
-    ApplicationTags applicationTags = new ApplicationTags.Builder(applicationName,
-        service).build();
-    Reporter wfSpanReporter = new WavefrontSpanReporter.Builder().
-        withSource("wavefront-tracing-example").build(wavefrontSender);
-    WavefrontTracer.Builder wfTracerBuilder = new WavefrontTracer.
-        Builder(wfSpanReporter, applicationTags);
-    return wfTracerBuilder.build();
-}
-```
+   ```java
+   public static Tracer init(String service) throws IOException {
+       WavefrontProxyClient.Builder wfProxyClientBuilder = new WavefrontProxyClient.
+           Builder("localhost").metricsPort(2878).tracingPort(30000);
+       WavefrontSender wavefrontSender = wfProxyClientBuilder.build();
+       /**
+        * TODO: You need to assign your microservices application a name.
+        * For this hackathon, please prepend your name (example: "john") to the beachshirts application,
+        * for example: applicationName = "john-beachshirts"
+        */
+       ApplicationTags applicationTags = new ApplicationTags.Builder(applicationName,
+           service).build();
+       Reporter wfSpanReporter = new WavefrontSpanReporter.Builder().
+           withSource("wavefront-tracing-example").build(wavefrontSender);
+       WavefrontTracer.Builder wfTracerBuilder = new WavefrontTracer.
+           Builder(wfSpanReporter, applicationTags);
+       return wfTracerBuilder.build();
+   }
+   ```
 
-4. Now all the tracing data should be sent to Wavefront. Go to the UI and click on Browse -> Traces
+   After making all the code changes, run `mvn clean install` from the root directory of the project.
+
+4. Now restart all the services again using below commands from root directory of the project.
+
+   ```bash
+   java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar
+   java -jar ./styling/target/styling-1.0-SNAPSHOT.jar
+   java -jar ./delivery/target/delivery-1.0-SNAPSHOT.jar
+   ```
+5. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+
+6. Now all the metrics, histograms and traces should be sent to Wavefront. Go to the UI and click on Browse -> Applications.
