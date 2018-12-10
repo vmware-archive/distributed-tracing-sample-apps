@@ -55,7 +55,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
    </dependencies> 
    ```
 
-   If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.32:
+   If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.33:
 
 3. * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
