@@ -1,0 +1,55 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeachShirts.Common", "src\BeachShirts.Common\BeachShirts.Common.csproj", "{16C9072F-5E5A-49C6-9402-0388F225F6B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeachShirts.Shopping", "src\BeachShirts.Shopping\BeachShirts.Shopping.csproj", "{47CD3D23-57DB-40FD-9633-9C20AC53190D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeachShirts.Styling", "src\BeachShirts.Styling\BeachShirts.Styling.csproj", "{D8251219-9318-4D27-868C-15261C5392B0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29CDF6C1-E7EE-4B3A-A470-AD052196ED56}"
+	ProjectSection(SolutionItems) = preProject
+		src\BeachShirts.Shopping.Dockerfile = src\BeachShirts.Shopping.Dockerfile
+		src\BeachShirts.Styling.Dockerfile = src\BeachShirts.Styling.Dockerfile
+		README.md = README.md
+		docker-compose.yaml = docker-compose.yaml
+		src\BeachShirts.Delivery.Dockerfile = src\BeachShirts.Delivery.Dockerfile
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeachShirts.Delivery", "src\BeachShirts.Delivery\BeachShirts.Delivery.csproj", "{4FCFF098-4724-4A90-8955-249D5A0AACE0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16C9072F-5E5A-49C6-9402-0388F225F6B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C9072F-5E5A-49C6-9402-0388F225F6B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16C9072F-5E5A-49C6-9402-0388F225F6B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16C9072F-5E5A-49C6-9402-0388F225F6B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47CD3D23-57DB-40FD-9633-9C20AC53190D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47CD3D23-57DB-40FD-9633-9C20AC53190D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47CD3D23-57DB-40FD-9633-9C20AC53190D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47CD3D23-57DB-40FD-9633-9C20AC53190D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8251219-9318-4D27-868C-15261C5392B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8251219-9318-4D27-868C-15261C5392B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8251219-9318-4D27-868C-15261C5392B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8251219-9318-4D27-868C-15261C5392B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FCFF098-4724-4A90-8955-249D5A0AACE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FCFF098-4724-4A90-8955-249D5A0AACE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FCFF098-4724-4A90-8955-249D5A0AACE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FCFF098-4724-4A90-8955-249D5A0AACE0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.FileWidth = 100
+		$1.TabsToSpaces = True
+		$1.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $2
+		$2.scope = text/x-csharp
+	EndGlobalSection
+EndGlobal
