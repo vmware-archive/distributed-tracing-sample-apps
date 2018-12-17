@@ -49,7 +49,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
      <dependency>
        <groupId>com.wavefront</groupId>
        <artifactId>wavefront-opentracing-sdk-java</artifactId>
-       <version>0.9.1</version>
+       <version>0.9.2</version>
      </dependency>
      ...
    </dependencies> 
