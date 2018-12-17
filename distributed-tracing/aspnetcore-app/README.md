@@ -73,10 +73,11 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
 
 4. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
-5. Go to `aspnetcore-app/BeachShirts.Common/Tracing.cs` and change the `ITracer Init(string service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of a Jaeger Tracer as follows:
+5. Go to `src/BeachShirts.Common/Tracing.cs` and change the `ITracer Init(string service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-csharp#set-up-a-tracer) instead of a Jaeger Tracer as follows:
 
    ```csharp
-   public static Tracer init(String service) throws IOException {
+   public static ITracer Init(string service)
+   {
        var wfProxyClientBuilder = new WavefrontProxyClient.Builder("localhost")
            .MetricsPort(2878).TracingPort(30000);
        var wavefrontSender = wfProxyClientBuilder.Build();
