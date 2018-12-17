@@ -102,4 +102,4 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
    
 6. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-7. Now all the metrics, histograms and traces should be sent to Wavefront. Go to the UI and click on Browse -> Applications.
+7. Now all the traces should be sent to Wavefront. Go to the UI and click on Browse -> Traces.
