@@ -26,9 +26,7 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
    cd hackathon/distributed-tracing/aspnetcore-app
    ```
 
-4. Run `dotnet build` from the root directory of the project.
-
-5. Now run all the services using the commands below:
+4. Now run all the services from the root directory of the project using the commands below:
 
    ```bash
    dotnet run --project src/BeachShirts.Shopping/BeachShirts.Shopping.csproj
@@ -36,9 +34,9 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
    dotnet run --project src/BeachShirts.Delivery/BeachShirts.Delivery.csproj
    ```
 
-6. Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
+5. Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
 
-7. Now go to Jaeger UI (http://localhost:16686, if you're using all-in-one docker image as given above) and look for the traces for service "Shopping" and click on Find Traces.
+6. Now go to Jaeger UI (http://localhost:16686, if you're using all-in-one docker image as given above) and look for the traces for service "Shopping" and click on Find Traces.
 
 ## Change from Jaeger to Wavefront
 
@@ -71,9 +69,9 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
           wavefronthq/proxy:latest
       ```
 
-4. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
+3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
-5. Go to `src/BeachShirts.Common/Tracing.cs` and change the `ITracer Init(string service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-csharp#set-up-a-tracer) instead of a Jaeger Tracer as follows:
+4. Go to `src/BeachShirts.Common/Tracing.cs` and change the `ITracer Init(string service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-csharp#set-up-a-tracer) instead of a Jaeger Tracer as follows:
 
    ```csharp
    public static ITracer Init(string service)
@@ -94,9 +92,7 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
    }
    ```
 
-   After making all the code changes, run `dotnet build` from the root directory of the project.
-
-4. Now restart all the services again using below commands from root directory of the project.
+5. Now restart all the services again using below commands from root directory of the project.
 
    ```bash
    dotnet run --project src/BeachShirts.Shopping/BeachShirts.Shopping.csproj
@@ -104,6 +100,6 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
    dotnet run --project src/BeachShirts.Delivery/BeachShirts.Delivery.csproj
    ```
    
-5. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+6. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-6. Now all the metrics, histograms and traces should be sent to Wavefront. Go to the UI and click on Browse -> Applications.
+7. Now all the metrics, histograms and traces should be sent to Wavefront. Go to the UI and click on Browse -> Applications.
