@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using BeachShirts.Common;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OpenTracing;
+using OpenTracing.Util;
 
 namespace BeachShirts.Shopping
 {
@@ -19,6 +22,17 @@ namespace BeachShirts.Shopping
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddSingleton<ITracer>(serviceProvider =>
+            {
+                var tracer = Tracing.Init("Shopping");
+                GlobalTracer.Register(tracer);
+                return tracer;
+            });
+
+            services.AddTransient<SpanContextPropagationHandler>();
+            services.AddHttpClient(NamedHttpClients.SpanContextPropagationClient)
+                    .AddHttpMessageHandler<SpanContextPropagationHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

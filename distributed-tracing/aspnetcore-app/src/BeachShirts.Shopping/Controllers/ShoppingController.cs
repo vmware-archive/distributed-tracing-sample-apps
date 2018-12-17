@@ -5,6 +5,8 @@ using BeachShirts.Common;
 using Microsoft.Extensions.Configuration;
 using System;
 using Microsoft.Extensions.Logging;
+using OpenTracing;
+using System.Net.Http;
 
 namespace BeachShirts.Shopping.Controllers
 {
@@ -15,21 +17,33 @@ namespace BeachShirts.Shopping.Controllers
         private readonly string stylingHost;
         private readonly Random random;
         private readonly ILogger logger;
+        private readonly ITracer tracer;
+        private readonly HttpClient client;
 
-        public ShoppingController(IConfiguration configuration, ILogger<ShoppingController> logger)
+        public ShoppingController(IConfiguration configuration, ILogger<ShoppingController> logger,
+            ITracer tracer, IHttpClientFactory httpClientFactory)
         {
             stylingHost = configuration.GetValue("StylingHost", Configuration.Host);
             random = new Random();
             this.logger = logger;
+            this.tracer = tracer;
+            client = httpClientFactory.CreateClient(NamedHttpClients.SpanContextPropagationClient);
         }
 
         // GET api/shop/menu
         [Route("menu")]
         [HttpGet]
-        public ActionResult<IEnumerable<ShirtStyle>> Menu()
+        public ActionResult<IEnumerable<ShirtStyle>> GetShoppingMenu()
         {
-            return Utils.HttpGet<IEnumerable<ShirtStyle>>(
-                stylingHost, Configuration.StylingPort, "api/style");
+            using (var scope = tracer.BuildSpan("GetShoppingMenu").StartActive(true))
+            {
+                return Utils.HttpGet<IEnumerable<ShirtStyle>>(
+                    client,
+                    stylingHost,
+                    Configuration.StylingPort,
+                    "api/style"
+                );
+            }
         }
 
         // POST api/shop/order
@@ -37,41 +51,46 @@ namespace BeachShirts.Shopping.Controllers
         [HttpPost]
         public ActionResult<DeliveryStatus> OrderShirts(Order order)
         {
-            if (random.Next(0, 10) == 0)
+            using (var scope = tracer.BuildSpan("OrderShirts").StartActive(true))
             {
-                string msg = "Failed to order shirts!";
-                logger.LogWarning(msg);
-                return StatusCode(503, msg);
-            }
+                if (random.Next(0, 10) == 0)
+                {
+                    string msg = "Failed to order shirts!";
+                    logger.LogWarning(msg);
+                    return StatusCode(503, msg);
+                }
 
-            if (order.StyleName == null)
-            {
-                string msg = "StyleName is null";
-                logger.LogWarning(msg);
-                return BadRequest(msg);
-            }
-            if (order.Quantity <= 0)
-            {
-                string msg = "Quantity is not a positive number: " + order.Quantity;
-                logger.LogWarning(msg);
-                return BadRequest(msg);
-            }
+                if (order.StyleName == null)
+                {
+                    string msg = "StyleName is null";
+                    logger.LogWarning(msg);
+                    return BadRequest(msg);
+                }
+                if (order.Quantity <= 0)
+                {
+                    string msg = "Quantity is not a positive number: " + order.Quantity;
+                    logger.LogWarning(msg);
+                    return BadRequest(msg);
+                }
 
-            var deliveryResponse = Utils.HttpGet<DeliveryStatus>(
-                stylingHost,
-                Configuration.StylingPort,
-                $"api/style/{order.StyleName}/make/{order.Quantity}"
-            );
+                var deliveryResponse = Utils.HttpGet<DeliveryStatus>(
+                    client,
+                    stylingHost,
+                    Configuration.StylingPort,
+                    $"api/style/{order.StyleName}/make/{order.Quantity}"
+                );
 
-            if (deliveryResponse.Result is OkObjectResult)
-            {
-                return deliveryResponse;
-            }
-            else
-            {
-                string msg = "Failed to order shirts!";
-                logger.LogWarning(msg);
-                return StatusCode(((StatusCodeResult)deliveryResponse.Result).StatusCode, msg);
+                if (deliveryResponse.Result is OkObjectResult)
+                {
+                    logger.LogInformation("Successfully ordered shirts!");
+                    return deliveryResponse;
+                }
+                else
+                {
+                    string msg = "Failed to order shirts!";
+                    logger.LogWarning(msg);
+                    return StatusCode(((StatusCodeResult)deliveryResponse.Result).StatusCode, msg);
+                }
             }
         }
     }

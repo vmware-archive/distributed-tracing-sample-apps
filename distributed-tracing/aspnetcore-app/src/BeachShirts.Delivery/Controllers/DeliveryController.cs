@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Threading;
+using BeachShirts.Common;
 using BeachShirts.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using OpenTracing;
 
 namespace BeachShirts.Delivery.Controllers
 {
@@ -11,11 +14,13 @@ namespace BeachShirts.Delivery.Controllers
     {
         private readonly Random random;
         private readonly ILogger logger;
+        private readonly ITracer tracer;
 
-        public DeliveryController(ILogger<DeliveryController> logger)
+        public DeliveryController(ITracer tracer, ILogger<DeliveryController> logger)
         {
             random = new Random();
             this.logger = logger;
+            this.tracer = tracer;
         }
 
         // POST api/delivery/dispatch/{orderNum}
@@ -23,31 +28,35 @@ namespace BeachShirts.Delivery.Controllers
         [HttpPost]
         public ActionResult<DeliveryStatus> Dispatch(string orderNum, PackedShirts packedShirts)
         {
-            if (random.Next(0, 5) == 0)
+            using (var scope = Tracing.StartServerSpan(tracer, HttpContext, "Dispatch"))
             {
-                string msg = "Failed to dispatch shirts!";
-                logger.LogWarning(msg);
-                return StatusCode(503, msg);
+                Thread.Sleep(random.Next(1, 5));
+                if (random.Next(0, 5) == 0)
+                {
+                    string msg = "Failed to dispatch shirts!";
+                    logger.LogWarning(msg);
+                    return StatusCode(503, msg);
+                }
+                if (random.Next(0, 10) == 0)
+                {
+                    orderNum = "";
+                }
+                if (string.IsNullOrWhiteSpace(orderNum))
+                {
+                    string msg = "Invalid Order Num";
+                    logger.LogWarning(msg);
+                    return BadRequest(msg);
+                }
+                if (packedShirts == null || packedShirts.Shirts == null || packedShirts.Shirts.Count == 0)
+                {
+                    string msg = "No shirts to deliver";
+                    logger.LogWarning(msg);
+                    return BadRequest(msg);
+                }
+                string trackingNum = Guid.NewGuid().ToString();
+                logger.LogInformation($"Successfully dispatched shirts! Tracking number of Order {orderNum} is {trackingNum}");
+                return Ok(new DeliveryStatus(orderNum, trackingNum, "shirts delivery dispatched"));
             }
-            if (random.Next(0, 10) == 0)
-            {
-                orderNum = "";
-            }
-            if (string.IsNullOrWhiteSpace(orderNum))
-            {
-                string msg = "Invalid Order Num";
-                logger.LogWarning(msg);
-                return BadRequest(msg);
-            }
-            if (packedShirts == null || packedShirts.Shirts == null || packedShirts.Shirts.Count == 0)
-            {
-                string msg = "No shirts to deliver";
-                logger.LogWarning(msg);
-                return BadRequest(msg);
-            }
-            string trackingNum = Guid.NewGuid().ToString();
-            logger.LogInformation($"Tracking number of Order {orderNum} is {trackingNum}");
-            return Ok(new DeliveryStatus(orderNum, trackingNum, "shirts delivery dispatched"));
         }
 
         // POST api/delivery/return/{orderNum}
@@ -55,13 +64,16 @@ namespace BeachShirts.Delivery.Controllers
         [HttpPost]
         public ActionResult Retrieve(string orderNum)
         {
-            if (string.IsNullOrWhiteSpace(orderNum))
+            using (var scope = Tracing.StartServerSpan(tracer, HttpContext, "Retrieve"))
             {
-                string msg = "Invalid Order Num";
-                logger.LogWarning(msg);
-                return BadRequest(msg);
+                if (string.IsNullOrWhiteSpace(orderNum))
+                {
+                    string msg = "Invalid Order Num";
+                    logger.LogWarning(msg);
+                    return BadRequest(msg);
+                }
+                return Ok($"Order {orderNum} returned");
             }
-            return Ok($"Order {orderNum} returned");
         }
     }
 }

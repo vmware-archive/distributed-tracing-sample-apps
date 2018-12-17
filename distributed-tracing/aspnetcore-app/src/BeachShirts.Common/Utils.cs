@@ -6,9 +6,8 @@ namespace BeachShirts.Common
 {
     public static class Utils
     {
-        private static readonly HttpClient client = new HttpClient();
-
-        public static ActionResult<T> HttpGet<T>(string host, int port, string path)
+        public static ActionResult<T> HttpGet<T>(
+            HttpClient client, string host, int port, string path)
         {
             var uri = new UriBuilder("http", host, port, path).Uri;
             var responseMessage = client.GetAsync(uri).Result;
@@ -24,7 +23,7 @@ namespace BeachShirts.Common
         }
 
         public static ActionResult<TResult> HttpPost<TModel, TResult>(
-            string host, int port, string path, TModel model)
+            HttpClient client, string host, int port, string path, TModel model)
         {
             var uri = new UriBuilder("http", host, port, path).Uri;
             var responseMessage = client.PostAsJsonAsync(uri, model).Result;

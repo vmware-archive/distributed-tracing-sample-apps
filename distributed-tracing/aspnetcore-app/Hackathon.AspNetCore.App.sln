@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 		docker-compose.yaml = docker-compose.yaml
 		src\BeachShirts.Delivery.Dockerfile = src\BeachShirts.Delivery.Dockerfile
+		loadgen.sh = loadgen.sh
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeachShirts.Delivery", "src\BeachShirts.Delivery\BeachShirts.Delivery.csproj", "{4FCFF098-4724-4A90-8955-249D5A0AACE0}"
