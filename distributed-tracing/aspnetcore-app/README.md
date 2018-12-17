@@ -1,4 +1,4 @@
-# Wavefront Hackthon - ASP.NET Core App
+# Wavefront Hackathon - ASP.NET Core App
 
 This is a sample .NET Core application called BeachShirts (#[beachops](https://medium.com/@matthewzeier/thoughts-from-an-operations-wrangler-how-we-use-alerts-to-monitor-wavefront-71329c5e57a8)) which makes cool shirts for the beach.
 
