@@ -72,7 +72,7 @@ This is a sample Python application using Django Framework called beachshirts (#
 
 3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
-4. Go to `setting.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Jaeger Tracer as follows:
+4. Go to `settings.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Jaeger Tracer as follows:
 
    ```python
    proxy_client = WavefrontProxyClient(
@@ -86,8 +86,6 @@ This is a sample Python application using Django Framework called beachshirts (#
    
    TRACER = WavefrontTracer(reporter=proxy_reporter) 
    ```
-
-   After making all the code changes, run `mvn clean install` from the root directory of the project.
 
 5. Now restart all the services again using below commands from root directory of the project.
 
