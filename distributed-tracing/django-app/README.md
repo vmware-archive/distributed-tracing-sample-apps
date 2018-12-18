@@ -26,7 +26,7 @@ This is a sample Python application using Django Framework called beachshirts (#
    cd hackathon/distributed-tracing/django-app
    ```
 
-4. Run `pip3 install -r requirements.txt` from the root directory of the project.
+4. Run `pip3 install -r requirements.txt` from the root directory of the project (* **Note**: This sample app works only with Python 3 since it’s built with Django 2, but all the Wavefront Python SDKs are compatible with both Python 2 and 3).
 
 5. Now run all the services using the commands below:
 
