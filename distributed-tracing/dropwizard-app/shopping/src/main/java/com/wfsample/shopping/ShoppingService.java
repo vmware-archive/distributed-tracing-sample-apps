@@ -7,6 +7,7 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
 
+import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +81,7 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     public Response orderShirts(OrderDTO orderDTO, @Context HttpHeaders httpHeaders) {
       try (Scope scope = tracer.buildSpan("orderShirts").startActive(true)) {
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
@@ -90,6 +92,7 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
           DeliveryStatusDTO deliveryStatus = deliveryResponse.readEntity(DeliveryStatusDTO.class);
           return Response.ok().entity(deliveryStatus).build();
         } else {
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();

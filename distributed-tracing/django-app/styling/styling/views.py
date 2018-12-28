@@ -37,6 +37,7 @@ def make_shirts(request, id):
     if random.randint(1, 5) == 5:
         msg = "Random Service Unavailable!"
         logging.warning(msg)
+        tracer.get_span(request).set_tag("error", "true")
         return Response(msg, status=503)
     quantity = int(request.GET.get('quantity', None))
     shirts = []
@@ -51,6 +52,7 @@ def make_shirts(request, id):
     else:
         msg = "Failed to make shirts!"
         logging.warning(msg)
+        tracer.get_span(request).set_tag("error", "true")
         return Response(msg, status=res.status_code)
 
 

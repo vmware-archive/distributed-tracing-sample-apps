@@ -25,6 +25,7 @@ def get_shopping_menu(request):
     if res.status_code == 200:
         return Response(res.json(), status=200)
     else:
+        tracer.get_span(request).set_tag("error", "true")
         return Response(status=res.status_code)
 
 
@@ -34,6 +35,7 @@ def order_shirts(request):
     if random.randint(1, 5) == 5:
         msg = "Random Service Unavailable!"
         logging.warning(msg)
+        tracer.get_span(request).set_tag("error", "true")
         return Response(msg, status=503)
     data = json.loads(request.body)
     style_name = data.get("styleName", None)
@@ -49,8 +51,10 @@ def order_shirts(request):
         else:
             msg = "Failed to order shirts!"
             logging.warning(msg)
+            tracer.get_span(request).set_tag("error", "true")
             return Response(msg, status=res.status_code)
     else:
+        tracer.get_span(request).set_tag("error", "true")
         return Response("Missing field!", status=400)
 
 

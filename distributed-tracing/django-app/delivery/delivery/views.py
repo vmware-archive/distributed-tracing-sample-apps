@@ -17,12 +17,14 @@ def dispatch(request, order_num):
     if random.randint(1, 5) == 5:
         msg = "Random Service Unavailable!"
         logging.warning(msg)
+        tracer.get_span(request).set_tag("error", "true")
         return Response(msg, status=503)
     if random.randint(1, 10) == 10:
         order_num = None
     if not order_num:
         msg = "Invalid Order Num!"
         logging.warning(msg)
+        tracer.get_span(request).set_tag("error", "true")
         return Response(msg, status=400)
     packed_shirts = None
     if random.randint(1, 10) != 10:
@@ -30,6 +32,7 @@ def dispatch(request, order_num):
     if not packed_shirts:
         msg = "No shirts to deliver!"
         logging.warning(msg)
+        tracer.get_span(request).set_tag("error", "true")
         return Response(msg, status=400)
     tracking_num = str(uuid.uuid4())
     logging.info("Tracking number of Order: " +

@@ -6,6 +6,7 @@ import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 
+import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +83,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
           String msg = "Failed to dispatch shirts!";
           logger.warn(msg);
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
         }
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
@@ -90,6 +92,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         if (orderNum.isEmpty()) {
           String msg = "Invalid Order Num";
           logger.warn(msg);
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
@@ -99,6 +102,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
             packedShirts.getShirts().size() == 0) {
           String msg = "No shirts to deliver";
           logger.warn(msg);
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         dispatchQueue.add(packedShirts);
@@ -115,6 +119,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         if (orderNum.isEmpty()) {
           String msg = "Invalid Order Num";
           logger.warn(msg);
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         return Response.ok("Order: " + orderNum + " returned").build();

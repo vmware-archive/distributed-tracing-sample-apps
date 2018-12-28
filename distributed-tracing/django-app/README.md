@@ -75,6 +75,14 @@ This is a sample Python application using Django Framework called beachshirts (#
 4. Go to `settings.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Jaeger Tracer as follows:
 
    ```python
+   # Doc for Instantiating ApplicationTags:
+   # https://github.com/wavefrontHQ/wavefront-sdk-python/blob/master/docs/apptags.md
+
+   application_tags = ApplicationTags(application="<APP_NAME>",
+                                      service="<SERVICE_NAME>",
+                                      cluster="<CLUSTER_NAME>",
+                                      shard="<SHARD_NAME>")
+   
    proxy_client = WavefrontProxyClient(
        host="<PROXY_HOST>",
        tracing_port=30000,
@@ -84,7 +92,7 @@ This is a sample Python application using Django Framework called beachshirts (#
    
    proxy_reporter = WavefrontSpanReporter(client=proxy_client)
    
-   TRACER = WavefrontTracer(reporter=proxy_reporter) 
+   TRACER = WavefrontTracer(reporter=proxy_reporter, application_tags=application_tags) 
    ```
 
 5. Now restart all the services again using below commands from root directory of the project.
