@@ -1,14 +1,20 @@
 package com.wfsample.delivery;
 
+import com.wavefront.sdk.common.WavefrontSender;
+import com.wavefront.sdk.common.application.ApplicationTags;
+import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
+import com.wavefront.sdk.dropwizard.reporter.WavefrontDropwizardReporter;
 import com.wfsample.common.DropwizardServiceConfig;
 import com.wfsample.common.Tracing;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 
+import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -50,6 +56,20 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
   public void run(DropwizardServiceConfig configuration, Environment environment) {
     dispatchQueue = new ConcurrentLinkedDeque<>();
     environment.jersey().register(new DeliveryWebResource());
+
+    ApplicationTags applicationTags = new ApplicationTags.Builder("beachshirts", "delivery").
+            cluster("us-west-2").shard("primary").customTags(new HashMap<String, String>(){{
+              put("env", "Staging");
+              put("location", "SF");
+            }}).build();
+
+    WavefrontSender wfSender = new WavefrontDirectIngestionClient.Builder("https://tracing.wavefront.com",
+            "104c7c31-598d-46e2-9972-0fd6c1ec8285").build();
+
+    WavefrontDropwizardReporter wfDropwizardReporter =
+            new WavefrontDropwizardReporter.Builder(environment.metrics(), applicationTags).build(wfSender);
+    wfDropwizardReporter.start();
+
     ScheduledExecutorServiceBuilder sesBuilder =
         environment.lifecycle().scheduledExecutorService("Clear Queue");
     ScheduledExecutorService ses = sesBuilder.build();
@@ -90,6 +110,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         if (orderNum.isEmpty()) {
           String msg = "Invalid Order Num";
           logger.warn(msg);
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
@@ -99,6 +120,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
             packedShirts.getShirts().size() == 0) {
           String msg = "No shirts to deliver";
           logger.warn(msg);
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         dispatchQueue.add(packedShirts);
@@ -115,6 +137,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         if (orderNum.isEmpty()) {
           String msg = "Invalid Order Num";
           logger.warn(msg);
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         return Response.ok("Order: " + orderNum + " returned").build();

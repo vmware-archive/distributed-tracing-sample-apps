@@ -1,9 +1,11 @@
 package com.wfsample.common;
 
-import com.uber.jaeger.Configuration;
-import com.uber.jaeger.Configuration.ReporterConfiguration;
-import com.uber.jaeger.Configuration.SamplerConfiguration;
-import com.uber.jaeger.samplers.ConstSampler;
+import com.wavefront.opentracing.WavefrontTracer;
+import com.wavefront.opentracing.reporting.Reporter;
+import com.wavefront.opentracing.reporting.WavefrontSpanReporter;
+import com.wavefront.sdk.common.WavefrontSender;
+import com.wavefront.sdk.common.application.ApplicationTags;
+import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
 import io.opentracing.Scope;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
@@ -22,18 +24,21 @@ public final class Tracing {
   private Tracing() {
   }
 
-  public static com.uber.jaeger.Tracer init(String service) {
-    SamplerConfiguration samplerConfig = SamplerConfiguration.fromEnv()
-        .withType(ConstSampler.TYPE)
-        .withParam(1);
+  public static io.opentracing.Tracer init(String serviceName) {
+    ApplicationTags applicationTags = new ApplicationTags.Builder("beachshirts", serviceName).
+            cluster("us-west-2").shard("primary").customTags(new HashMap<String, String>(){{
+      put("env", "Staging");
+      put("location", "SF");
+    }}).build();
 
-    ReporterConfiguration reporterConfig = ReporterConfiguration.fromEnv();
+    WavefrontSender wfSender = new WavefrontDirectIngestionClient.Builder("https://tracing.wavefront.com",
+            "104c7c31-598d-46e2-9972-0fd6c1ec8285").build();
 
-    Configuration config = new Configuration(service)
-        .withSampler(samplerConfig)
-        .withReporter(reporterConfig);
-
-    return (com.uber.jaeger.Tracer) config.getTracer();
+    Reporter wfSpanReporter = new WavefrontSpanReporter.Builder().
+            withSource("wavefront-tracing-example").build(wfSender);
+    WavefrontTracer.Builder wfTracerBuilder = new WavefrontTracer.
+            Builder(wfSpanReporter, applicationTags);
+    return wfTracerBuilder.build();
   }
 
   public static Scope startServerSpan(Tracer tracer, javax.ws.rs.core.HttpHeaders httpHeaders, String operationName) {

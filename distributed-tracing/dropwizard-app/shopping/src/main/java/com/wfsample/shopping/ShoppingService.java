@@ -1,5 +1,9 @@
 package com.wfsample.shopping;
 
+import com.wavefront.sdk.common.WavefrontSender;
+import com.wavefront.sdk.common.application.ApplicationTags;
+import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
+import com.wavefront.sdk.dropwizard.reporter.WavefrontDropwizardReporter;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
 import com.wfsample.common.Tracing;
@@ -7,9 +11,11 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
 
+import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.Consumes;
@@ -55,6 +61,19 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
         .getStylingPort();
     environment.jersey().register(new ShoppingWebResource(
         BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, this.tracer)));
+
+    ApplicationTags applicationTags = new ApplicationTags.Builder("beachshirts", "shopping").
+            cluster("us-west-2").shard("secondary").customTags(new HashMap<String, String>(){{
+      put("env", "Staging");
+      put("location", "LA");
+    }}).build();
+
+    WavefrontSender wfSender = new WavefrontDirectIngestionClient.Builder("https://tracing.wavefront.com",
+            "104c7c31-598d-46e2-9972-0fd6c1ec8285").build();
+
+    WavefrontDropwizardReporter wfDropwizardReporter =
+            new WavefrontDropwizardReporter.Builder(environment.metrics(), applicationTags).build(wfSender);
+    wfDropwizardReporter.start();
   }
 
   @Path("/shop")
@@ -80,6 +99,7 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     public Response orderShirts(OrderDTO orderDTO, @Context HttpHeaders httpHeaders) {
       try (Scope scope = tracer.buildSpan("orderShirts").startActive(true)) {
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
@@ -90,6 +110,7 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
           DeliveryStatusDTO deliveryStatus = deliveryResponse.readEntity(DeliveryStatusDTO.class);
           return Response.ok().entity(deliveryStatus).build();
         } else {
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();

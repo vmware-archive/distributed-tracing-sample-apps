@@ -1,5 +1,9 @@
 package com.wfsample.styling;
 
+import com.wavefront.sdk.common.WavefrontSender;
+import com.wavefront.sdk.common.application.ApplicationTags;
+import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
+import com.wavefront.sdk.dropwizard.reporter.WavefrontDropwizardReporter;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
 import com.wfsample.common.Tracing;
@@ -10,10 +14,12 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
+import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -54,6 +60,19 @@ public class StylingService extends Application<DropwizardServiceConfig> {
         .getDeliveryPort();
     environment.jersey().register(new StylingWebResource(
         BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, this.tracer)));
+
+    ApplicationTags applicationTags = new ApplicationTags.Builder("beachshirts", "styling").
+            cluster("us-west-1").shard("primary").customTags(new HashMap<String, String>(){{
+      put("env", "Staging");
+      put("location", "SF");
+    }}).build();
+
+    WavefrontSender wfSender = new WavefrontDirectIngestionClient.Builder("https://tracing.wavefront.com",
+            "104c7c31-598d-46e2-9972-0fd6c1ec8285").build();
+
+    WavefrontDropwizardReporter wfDropwizardReporter =
+            new WavefrontDropwizardReporter.Builder(environment.metrics(), applicationTags).build(wfSender);
+    wfDropwizardReporter.start();
   }
 
   public class StylingWebResource implements StylingApi {
@@ -101,6 +120,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
         if (deliveryResponse.getStatus() < 400) {
           return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
         } else {
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to make shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();
