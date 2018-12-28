@@ -10,6 +10,7 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
+import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +87,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
         if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
           String msg = "Failed to make shirts!";
           logger.warn(msg);
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
         }
         String orderNum = UUID.randomUUID().toString();
@@ -101,6 +103,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
         if (deliveryResponse.getStatus() < 400) {
           return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
         } else {
+          scope.span().setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to make shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();
