@@ -143,7 +143,7 @@ WavefrontJaxrsClientFilter wfJaxrsClientFilter =
 @Inject
 public JerseyConfig() {
   WavefrontJerseyFactory wfJerseyFactory = new WavefrontJerseyFactory(
-      "shopping/styling.yaml", "shopping/wf-reporting-config.yaml");
+      "shopping/shopping.yaml", "shopping/wf-reporting-config.yaml");
   WavefrontJerseyFilter wfJerseyFilter = 
       wfJerseyFactory.getWavefrontJerseyFilter();
   WavefrontJaxrsClientFilter wfJaxrsClientFilter = 
