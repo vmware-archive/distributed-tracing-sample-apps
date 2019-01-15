@@ -1,0 +1,7 @@
+FROM us.gcr.io/wavefront-gcp-dev/akodali/java
+
+COPY styling-1.0-SNAPSHOT.jar /app/styling-1.0-SNAPSHOT.jar
+
+COPY styleapp.yaml /app/app.yaml
+
+ENTRYPOINT java -jar /app/styling-1.0-SNAPSHOT.jar server /app/app.yaml

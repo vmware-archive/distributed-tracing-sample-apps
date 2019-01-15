@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: styleapp
+  labels:
+    app: istio-beachshirts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: styling-app-pod
+      app: istio-beachshirts
+  template:
+    metadata:
+      name: styling-app-pod
+      labels:
+        name: styling-app-pod
+        app: istio-beachshirts
+
+    spec:
+      containers:
+        - name: styling-app
+          image: us.gcr.io/wavefront-gcp-dev/akodali/styling
+          ports:
+            - containerPort: 50051

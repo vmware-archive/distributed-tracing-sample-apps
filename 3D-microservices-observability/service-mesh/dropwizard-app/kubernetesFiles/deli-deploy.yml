@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deliapp
+  labels:
+    app: istio-beachshirts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: delivery-app-pod
+      app: istio-beachshirts
+  template:
+    metadata:
+      name: delivery-app-pod
+      labels:
+        name: delivery-app-pod
+        app: istio-beachshirts
+
+    spec:
+      containers:
+        - name: delivery-app
+          image: us.gcr.io/wavefront-gcp-dev/akodali/delivery
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50052
