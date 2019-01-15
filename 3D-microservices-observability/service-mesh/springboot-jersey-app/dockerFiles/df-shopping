@@ -1,0 +1,5 @@
+FROM us.gcr.io/wavefront-gcp-dev/akodali/java
+
+COPY shopping-1.0-SNAPSHOT.jar /app/shopping-1.0-SNAPSHOT.jar
+
+ENTRYPOINT java -jar /app/shopping-1.0-SNAPSHOT.jar
