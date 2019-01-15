@@ -8,6 +8,8 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
+import jdk.internal.jline.internal.Nullable;
+
 /**
  * Utilities for use by the various beachshirts application related services.
  *
@@ -19,7 +21,7 @@ public final class BeachShirtsUtils {
   }
 
   public static <T> T createProxyClient(String url, Class<T> clazz,
-                                        B3HeadersRequestFilter b3Filter) {
+                                        @Nullable B3HeadersRequestFilter b3Filter) {
     HttpClient httpClient = HttpClientBuilder.create().setMaxConnTotal(2000).
         setMaxConnPerRoute(1000).build();
     ApacheHttpClient4Engine apacheHttpClient4Engine = new ApacheHttpClient4Engine(httpClient, true);
