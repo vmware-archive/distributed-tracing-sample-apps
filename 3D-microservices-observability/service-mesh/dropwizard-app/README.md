@@ -25,3 +25,9 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
   ```
 
 - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds
+
+
+## Running Application in Istio:
+
+- Build container images for each service using instructions in (#[Docker Files](https://github.com/wavefrontHQ/hackathon/blob/akodali/sm/3D-microservices-observability/service-mesh/dropwizard-app/dockerFiles/README.md))
+- Deploy container images in kubernetes and configure istio networking using instructions in (#[Kubernetes deployment files](https://github.com/wavefrontHQ/hackathon/blob/akodali/sm/3D-microservices-observability/service-mesh/dropwizard-app/kubernetesFiles/README.md))
