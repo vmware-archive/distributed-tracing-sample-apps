@@ -160,8 +160,8 @@ Click [here](https://github.com/wavefrontHQ/wavefront-jersey-sdk-java/blob/maste
 We will rely on [WavefrontJaxrsClientFilter](https://github.com/wavefrontHQ/wavefront-jaxrs-sdk-java#wavefrontjaxrsclientfilter) to do this.
 
 You need to pass WavefrontJaxrsClientFilter that was instantiated in the step 4 above to `BeachShirtsUtils.createProxyClient` method in -
-   * [ShoppingController](https://github.com/wavefrontHQ/hackathon/blob/master/enhanced-application-observability/springboot-jersey-app/shopping/src/main/java/com/wfsample/shopping/ShoppingController.java)
-   * [StylingController](https://github.com/wavefrontHQ/hackathon/blob/master/enhanced-application-observability/springboot-jersey-app/styling/src/main/java/com/wfsample/styling/StylingController.java)
+   * [ShoppingController](https://github.com/wavefrontHQ/hackathon/tree/master/3D-microservices-observability/springboot-jersey-app/shopping/src/main/java/com/wfsample/shopping/ShoppingController.java)
+   * [StylingController](https://github.com/wavefrontHQ/hackathon/tree/master/3D-microservices-observability/springboot-jersey-app/styling/src/main/java/com/wfsample/styling/StylingController.java)
 
 ```java
 // Example of shopping/../ShoppingController  
