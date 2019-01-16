@@ -5,8 +5,7 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
 
 ## Running Application locally 
 
-View(#[Dropwizard App](https://github
-.com/wavefrontHQ/hackathon/tree/master/3D-microservices-observability/dropwizard-app#wavefront-hackthon---dropwizard-app) instructions.
+View(#[Dropwizard App](https://github.com/wavefrontHQ/hackathon/tree/master/3D-microservices-observability/dropwizard-app#wavefront-hackthon---dropwizard-app) instructions.
 
 
 ## Running Application in Istio:
