@@ -129,10 +129,10 @@ WavefrontJaxrsClientFilter wfJaxrsClientFilter =
 ```
 
 6. After instantiating WavefrontJerseyFilter for the 3 microservices, you need to register it with the respective microservice. You need to paste the below snippet for
-  * dropwizard-app/shopping/src/main/java/com/wfsample/shopping/JerseyConfig.java
-  * dropwizard-app/styling/src/main/java/com/wfsample/styling/JerseyConfig.java
-  * dropwizard-app/delivery/src/main/java/com/wfsample/delivery/JerseyConfig.java
-
+  * dropwizard-app/shopping/src/main/java/com/wfsample/shopping/ShoppingService.java
+  * dropwizard-app/styling/src/main/java/com/wfsample/styling/StylingService.java
+  * dropwizard-app/delivery/src/main/java/com/wfsample/delivery/DeliveryService.java
+  
 ```java
 // Example on how to register
 public class MyApplication extends Application<MyConfiguration>{
