@@ -46,7 +46,7 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
    dotnet add src/BeachShirts.Common/BeachShirts.Common.csproj package Wavefront.OpenTracing.SDK.CSharp
    ```
 
-2. Make sure you have the Wavefront proxy (version >= v4.33) installed.
+2. Make sure you have the Wavefront proxy (version >= v4.34) installed.
 
    * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
