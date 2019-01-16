@@ -1,9 +1,9 @@
 # Wavefront Hackathon - Springboot Jersey App
 
-This is a sample java application using Springboot with Jersey called beachshirts (#[beachops](https://medium.com/@matthewzeier/thoughts-from-an-operations-wrangler-how-we-use-alerts-to-monitor-wavefront-71329c5e57a8)) 
-which makes shirts for the beach. 
+This is a sample java application using Springboot with Jersey called beachshirts (#[beachops](https://medium.com/@matthewzeier/thoughts-from-an-operations-wrangler-how-we-use-alerts-to-monitor-wavefront-71329c5e57a8))
+which makes shirts for the beach.
 
-## Running Application locally 
+## Running Application locally
 
 - `git clone` this repo and navigate to this dir:
 
@@ -47,7 +47,7 @@ In order to instrument your application to emit out of the box metrics, histogra
     <version>0.9.0</version>
   </dependency>
   ...
-</dependencies> 
+</dependencies>
 ```
 
 2. If you are sending data to Wavefront via Proxy, then make sure you are using proxy version >= v4.32:
@@ -116,8 +116,8 @@ customTags:
   env: Staging
 ```
 
-4. Next, use the [Wavefront Jersey SDK Quickstart](https://github.com/wavefrontHQ/wavefront-jersey-sdk-java#quickstart) to instantiate WavefrontJerseyFilter. 
-   * You have already created the ApplicationTags in the step above. 
+4. Next, use the [Wavefront Jersey SDK Quickstart](https://github.com/wavefrontHQ/wavefront-jersey-sdk-java#quickstart) to instantiate WavefrontJerseyFilter.
+   * You have already created the ApplicationTags in the step above.
    * Also, if you are using Wavefront proxy to send data to Wavefront then use proxy version >= 4.32
    * You need to create 2 YAML files per microservice: `wf-reporting-config.yaml` and applicationTags YAML file highlighted in the step above.
 
@@ -127,9 +127,9 @@ You can do this using the below sample code -
 // Instantiate the WavefrontJerseyFilter
 WavefrontJerseyFactory wfJerseyFactory = new WavefrontJerseyFactory(
     applicationTagsYamlFile, wfReportingConfigYamlFile);
-WavefrontJerseyFilter wfJerseyFilter = 
+WavefrontJerseyFilter wfJerseyFilter =
     wfJerseyFactory.getWavefrontJerseyFilter();
-WavefrontJaxrsClientFilter wfJaxrsClientFilter = 
+WavefrontJaxrsClientFilter wfJaxrsClientFilter =
     wfJerseyFactory.getWavefrontJaxrsClientFilter();
 ```
 
@@ -143,10 +143,10 @@ WavefrontJaxrsClientFilter wfJaxrsClientFilter =
 @Inject
 public JerseyConfig() {
   WavefrontJerseyFactory wfJerseyFactory = new WavefrontJerseyFactory(
-      "shopping/shopping.yaml", "shopping/wf-reporting-config.yaml");
-  WavefrontJerseyFilter wfJerseyFilter = 
+      "shopping/styling.yaml", "shopping/wf-reporting-config.yaml");
+  WavefrontJerseyFilter wfJerseyFilter =
       wfJerseyFactory.getWavefrontJerseyFilter();
-  WavefrontJaxrsClientFilter wfJaxrsClientFilter = 
+  WavefrontJaxrsClientFilter wfJaxrsClientFilter =
       wfJerseyFactory.getWavefrontJaxrsClientFilter();
   register(wfJerseyFilter);
   register(wfJaxrsClientFilter);
@@ -191,3 +191,8 @@ ShoppingController(WavefrontJaxrsClientFilter wfJaxrsClientFilter) {
 10. Now all the metrics, histograms and traces should be sent to Wavefront. Go to the UI and click on Browse -> Applications.
 
   * (Optional) Custom Business Metrics - There are several `#TODO` in the code to address the custom business metrics. Once those TODOs are completed using the [Wavefront Dropwizard Metrics SDK](https://github.com/wavefrontHQ/wavefront-dropwizard-metrics-sdk-java), you can view those metrics on the Wavefront UI.
+
+  ## Running Application in Istio:
+
+  - Build container images for each service using instructions in (#[Docker Files](https://github.com/wavefrontHQ/hackathon/blob/akodali/sm/3D-microservices-observability/service-mesh/springboot-jersey-app/dockerFiles/README.md))
+  - Deploy container images in kubernetes and configure istio networking using instructions in (#[Kubernetes deployment files](https://github.com/wavefrontHQ/hackathon/blob/akodali/sm/3D-microservices-observability/service-mesh/springboot-jersey-app/kubernetesFiles/README.md))

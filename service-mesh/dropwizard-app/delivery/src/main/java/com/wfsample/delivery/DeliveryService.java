@@ -15,6 +15,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.dropwizard.Application;
@@ -80,6 +82,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
 
     @Override
     public Response dispatch(String orderNum, PackedShirtsDTO packedShirts) {
+      System.out.println("In Delivery/dispatch -------::");
       if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
         String msg = "Failed to dispatch shirts!";
         logger.warn(msg);
@@ -117,6 +120,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
 
     @Override
     public Response retrieve(String orderNum) {
+      System.out.println("In Delivery/retrieve -------::");
       if (orderNum.isEmpty()) {
         /*
          * TODO: Try to emitting an error metrics with relevant ApplicationTags to Wavefront.

@@ -1,12 +1,12 @@
 package com.wfsample.styling;
 
-import com.wavefront.sdk.jaxrs.client.WavefrontJaxrsClientFilter;
+import com.wfsample.common.B3HeadersRequestFilter;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
+import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.ShirtDTO;
 import com.wfsample.common.dto.ShirtStyleDTO;
-import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.dropwizard.Application;
@@ -33,7 +34,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class StylingService extends Application<DropwizardServiceConfig> {
   private static Logger logger = LoggerFactory.getLogger(StylingService.class);
-
+  private B3HeadersRequestFilter b3Filter;
   private StylingService() {
   }
 
@@ -45,10 +46,11 @@ public class StylingService extends Application<DropwizardServiceConfig> {
   public void run(DropwizardServiceConfig configuration, Environment environment) {
     String deliveryUrl = "http://" + configuration.getDeliveryHost() + ":" + configuration
         .getDeliveryPort();
-    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
+    // Filter to propagate B3 headers.
+    b3Filter = new B3HeadersRequestFilter();
     // TODO: Initialize WavefrontJaxrsFilter here.
     environment.jersey().register(new StylingWebResource(
-        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, wavefrontJaxrsFilter)));
+        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, b3Filter)));
   }
 
   public class StylingWebResource implements StylingApi {
@@ -68,11 +70,16 @@ public class StylingService extends Application<DropwizardServiceConfig> {
       shirtStyleDTOS.add(dto2);
     }
 
-    public List<ShirtStyleDTO> getAllStyles() {
+    @Override
+    public List<ShirtStyleDTO> getAllStyles(HttpHeaders httpHeaders) {
+      // Propagate B3 headers.
+      b3Filter.setB3Headers(httpHeaders);
       return shirtStyleDTOS;
     }
-
-    public Response makeShirts(String id, int quantity) {
+    @Override
+    public Response makeShirts(String id, int quantity, HttpHeaders httpHeaders) {
+      // Propagate B3 headers.
+      b3Filter.setB3Headers(httpHeaders);
       /*
        * TODO: Try to report the value of quantity using WavefrontHistogram.
        * Important: Make sure you are sending to Minute bin instead of Hour or Day bin!
@@ -99,7 +106,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
       if (deliveryResponse.getStatus() < 400) {
         return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
       } else {
-        String msg = "Failed to make shirts!";
+        String msg = "Failed to make shirts-styling!";
         logger.warn(msg);
         return Response.status(deliveryResponse.getStatus()).entity(msg).build();
       }

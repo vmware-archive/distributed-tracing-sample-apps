@@ -1,6 +1,7 @@
 package com.wfsample.shopping;
 
 import com.wavefront.sdk.jaxrs.client.WavefrontJaxrsClientFilter;
+import com.wfsample.common.B3HeadersRequestFilter;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
@@ -33,23 +34,30 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Produces(MediaType.APPLICATION_JSON)
 public class ShoppingController {
   private final StylingApi stylingApi;
+  private B3HeadersRequestFilter b3Filter;
   private static Logger logger = LoggerFactory.getLogger(ShoppingService.class);
 
   ShoppingController() {
-    String stylingUrl = "http://localhost:50051";
-    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
+//    String stylingUrl = "http://localhost:50051";
+    // Modify to use the service alias for styling service in Kubernetes.
+    String stylingUrl = "http://stylingservice:50051";
+//    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
     /**
      * TODO: Initialize WavefrontJaxrsClientFilter in JerseyConfig.java, add an argument of it in
      * the constructor as well and uncomment the following line to use it.
      */
     // wavefrontJaxrsFilter = wfJaxrsClientFilter;
-    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, wavefrontJaxrsFilter);
+    // Filter to propagate B3 headers.
+    b3Filter = new B3HeadersRequestFilter();
+    this.stylingApi = BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, b3Filter);
   }
 
   @GET
   @Path("/menu")
   public Response getShoppingMenu(@Context HttpHeaders httpHeaders) {
-    return Response.ok(stylingApi.getAllStyles()).build();
+    // Propagate B3 headers.
+    b3Filter.setB3Headers(httpHeaders);
+    return Response.ok(stylingApi.getAllStyles(httpHeaders)).build();
   }
 
   @POST
@@ -60,8 +68,10 @@ public class ShoppingController {
       String msg = "Failed to order shirts!";
       logger.warn(msg);
       return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();    }
+    // Propagate B3 headers.
+    b3Filter.setB3Headers(httpHeaders);
     Response deliveryResponse = stylingApi.makeShirts(
-        orderDTO.getStyleName(), orderDTO.getQuantity());
+        orderDTO.getStyleName(), orderDTO.getQuantity(), httpHeaders);
     if (deliveryResponse.getStatus() < 400) {
       DeliveryStatusDTO deliveryStatus = deliveryResponse.readEntity(DeliveryStatusDTO.class);
       return Response.ok().entity(deliveryStatus).build();
