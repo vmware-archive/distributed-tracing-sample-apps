@@ -41,7 +41,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 
 ## Change from Jaeger to Wavefront
 
-1. Add dependency of `Wavefront Opentracing SDK` to the `pom.xml`:
+1. Add dependency of [`Wavefront Opentracing SDK`](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java) to the `pom.xml`:
 
    ```xml
    <dependencies>
@@ -49,13 +49,13 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
      <dependency>
        <groupId>com.wavefront</groupId>
        <artifactId>wavefront-opentracing-sdk-java</artifactId>
-       <version>0.9.2</version>
+       <version>${latest}</version>
      </dependency>
      ...
    </dependencies> 
    ```
 
-2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.33:
+2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.34:
 
    * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
