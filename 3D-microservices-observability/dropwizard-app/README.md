@@ -39,7 +39,7 @@ In order to instrument your application to emit out of the box metrics, histogra
   <dependency>
     <groupId>com.wavefront</groupId>
     <artifactId>wavefront-jersey-sdk-java</artifactId>
-    <version>0.9.0</version>
+    <version>${latest}</version>
   </dependency>
   ...
 </dependencies> 
@@ -111,9 +111,9 @@ customTags:
   env: Staging
 ```
 
-4. Next, use the [Wavefront Jersey SDK Quickstart](https://github.com/wavefrontHQ/wavefront-jersey-sdk-java#quickstart) to instantiate WavefrontJerseyFilter. 
+5. Next, use the [Wavefront Jersey SDK Quickstart](https://github.com/wavefrontHQ/wavefront-jersey-sdk-java#quickstart) to instantiate WavefrontJerseyFilter. 
    * You have already created the ApplicationTags in the step above. 
-   * Also, if you are using Wavefront proxy to send data to Wavefront then use proxy version >= 4.32
+   * Also, if you are using Wavefront proxy to send data to Wavefront then use proxy version >= 4.34
    * You need to create 2 YAML files per microservice: `wf-reporting-config.yaml` and applicationTags YAML file highlighted in the step above.
 
 Since all the 3 microservices (shopping, styling and delivery) in the sample app are based on Jersey Framework, you need to instantiate WavefrontJerseyFilter for every microservice.
@@ -128,7 +128,7 @@ WavefrontJaxrsClientFilter wfJaxrsClientFilter =
     wfJerseyFactory.getWavefrontJaxrsClientFilter();
 ```
 
-5. After instantiating WavefrontJerseyFilter for the 3 microservices, you need to register it with the respective microservice. You need to paste the below snippet for
+6. After instantiating WavefrontJerseyFilter for the 3 microservices, you need to register it with the respective microservice. You need to paste the below snippet for
   * dropwizard-app/shopping/src/main/java/com/wfsample/shopping/JerseyConfig.java
   * dropwizard-app/styling/src/main/java/com/wfsample/styling/JerseyConfig.java
   * dropwizard-app/delivery/src/main/java/com/wfsample/delivery/JerseyConfig.java
@@ -153,7 +153,7 @@ public class MyApplication extends Application<MyConfiguration>{
 
 Click [here](https://github.com/wavefrontHQ/wavefront-jersey-sdk-java/blob/master/docs/dropwizard.md) for more details on register WavefrontJerseyFilter with your dropwizard application microservice.
 
-6. In order for traces to be collected across microservices process boundaries, we need to correctly propagate context.
+7. In order for traces to be collected across microservices process boundaries, we need to correctly propagate context.
 We will rely on [WavefrontJaxrsClientFilter](https://github.com/wavefrontHQ/wavefront-jaxrs-sdk-java#wavefrontjaxrsclientfilter) to do this.
 
 You need to pass WavefrontJaxrsClientFilter that was instantiated in the step 4 above to `BeachShirtsUtils.createProxyClient` method in -
@@ -173,9 +173,9 @@ ShoppingController(WavefrontJaxrsClientFilter wfJaxrsClientFilter) {
 }
 ```
 
-7. After making all the code changes, run `mvn clean install` from the root directory of the project.
+8. After making all the code changes, run `mvn clean install` from the root directory of the project.
 
-8. Now restart all the services again using below commands from root directory of the project.
+9. Now restart all the services again using below commands from root directory of the project.
 
   ```bash
   java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar
@@ -183,8 +183,8 @@ ShoppingController(WavefrontJaxrsClientFilter wfJaxrsClientFilter) {
   java -jar ./delivery/target/delivery-1.0-SNAPSHOT.jar
   ```
 
-9. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+10. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-10. Now all the metrics, histograms and traces should be sent to Wavefront. Go to the UI and click on Browse -> Applications.
+11. Now all the metrics, histograms and traces should be sent to Wavefront. Go to the UI and click on Browse -> Applications.
 
-  * (Optional) Custom Business Metrics - There are several `#TODO` in the code to address the custom business metrics. Once those TODOs are completed using the [Wavefront Dropwizard Metrics SDK](https://github.com/wavefrontHQ/wavefront-dropwizard-metrics-sdk-java), you can view those metrics on the Wavefront UI.
+12. (Optional) Custom Business Metrics - There are several `#TODO` in the code to address the custom business metrics. Once those TODOs are completed using the [Wavefront Dropwizard Metrics SDK](https://github.com/wavefrontHQ/wavefront-dropwizard-metrics-sdk-java), you can view those metrics on the Wavefront UI.
