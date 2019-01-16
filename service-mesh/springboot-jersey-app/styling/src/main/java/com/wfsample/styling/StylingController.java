@@ -35,15 +35,11 @@ public class StylingController implements StylingApi {
   private static Logger logger = LoggerFactory.getLogger(StylingService.class);
 
   StylingController() {
-//    String deliveryUrl = "http://localhost:50052";
-    // Modify to use the service alias for delivery service in Kubernetes.
+    // Use the service alias for delivery service in Kubernetes.
     String deliveryUrl = "http://deliveryservice:50052";
-//    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
-    /**
-     * TODO: Initialize WavefrontJaxrsClientFilter in JerseyConfig.java, add an argument of it in
-     * the constructor as well and uncomment the following line to use it.
-     */
-    // wavefrontJaxrsFilter = wfJaxrsClientFilter;
+    // Uncomment the below line to use localhost instead.
+    // String stylingUrl = "http://localhost:50052";
+
     // Filter to propagate B3 headers.
     b3Filter = new B3HeadersRequestFilter();
     this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, b3Filter);

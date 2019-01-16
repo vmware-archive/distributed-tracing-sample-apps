@@ -106,7 +106,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
       if (deliveryResponse.getStatus() < 400) {
         return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
       } else {
-        String msg = "Failed to make shirts-styling!";
+        String msg = "Failed to make shirts!";
         logger.warn(msg);
         return Response.status(deliveryResponse.getStatus()).entity(msg).build();
       }

@@ -38,14 +38,11 @@ public class ShoppingController {
   private static Logger logger = LoggerFactory.getLogger(ShoppingService.class);
 
   ShoppingController() {
-//    String stylingUrl = "http://localhost:50051";
-    // Modify to use the service alias for styling service in Kubernetes.
+    // Use the service alias for styling service in Kubernetes.
     String stylingUrl = "http://stylingservice:50051";
-//    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
-    /**
-     * TODO: Initialize WavefrontJaxrsClientFilter in JerseyConfig.java, add an argument of it in
-     * the constructor as well and uncomment the following line to use it.
-     */
+    // Uncomment the below line to use localhost instead.
+    // String stylingUrl = "http://localhost:50051";
+
     // wavefrontJaxrsFilter = wfJaxrsClientFilter;
     // Filter to propagate B3 headers.
     b3Filter = new B3HeadersRequestFilter();

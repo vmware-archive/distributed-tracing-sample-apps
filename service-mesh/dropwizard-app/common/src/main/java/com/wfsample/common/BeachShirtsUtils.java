@@ -8,7 +8,7 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
-import jdk.internal.jline.internal.Nullable;
+import javax.annotation.Nullable;
 
 /**
  * Utilities for use by the various beachshirts application related services.
