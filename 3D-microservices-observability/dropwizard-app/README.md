@@ -72,7 +72,7 @@ In order to instrument your application to emit out of the box metrics, histogra
 
    * You need to define ApplicationTags for all the 3 microservices. ApplicationTags are composed of application name and service name. Optionally, you can also define the cluster in which the service is running along with what shard it is running on. You can also define optional custom tags.
 
-  * shopping yaml file - `springboot-jersey-app/shopping/src/main/resources/shopping.yaml`
+  * shopping yaml file - `dropwizard-app/shopping/src/main/resources/shopping.yaml`
 ```yaml
 # For this hackathon, please prepend your name (example: "john") to the beachshirts application,
 # for example: applicationName = "john-beachshirts"
@@ -85,7 +85,7 @@ customTags:
   env: Staging
 ```
 
-  * styling yaml file - `springboot-jersey-app/styling/src/main/resources/styling.yaml`
+  * styling yaml file - `dropwizard-app/styling/src/main/resources/styling.yaml`
 ```yaml
 # For this hackathon, please prepend your name (example: "john") to the beachshirts application,
 # for example: applicationName = "john-beachshirts"
@@ -98,7 +98,7 @@ customTags:
   env: Staging
 ```
 
-  * delivery yaml file - ``springboot-jersey-app/delivery/src/main/resources/delivery.yaml``
+  * delivery yaml file - ``dropwizard-app/delivery/src/main/resources/delivery.yaml``
 ```yaml
 # For this hackathon, please prepend your name (example: "john") to the beachshirts application,
 # for example: applicationName = "john-beachshirts"
