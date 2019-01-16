@@ -5,7 +5,7 @@ which makes shirts for the beach.
 
 ## Running Application locally
 
-View (#[Springboot Jersey App](https://github.com/wavefrontHQ/hackathon/tree/master/3D-microservices-observability/springboot-jersey-app#wavefront-hackathon---springboot-jersey-app) instructions.
+View (#[Springboot Jersey App](https://github.com/wavefrontHQ/hackathon/tree/master/3D-microservices-observability/springboot-jersey-app#wavefront-hackathon---springboot-jersey-app)) instructions.
 
 ## Running Application in Istio:
 
