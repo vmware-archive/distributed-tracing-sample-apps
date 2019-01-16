@@ -31,7 +31,7 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
 
 In order to instrument your application to emit out of the box metrics, histograms and traces follow the steps listed below.
 
-1. Add following dependency of `Wavefront Jersey SDK` to the `pom.xml`
+1. Add following dependency of [`Wavefront Jersey SDK`](https://github.com/wavefrontHQ/wavefront-jersey-sdk-java) to the `pom.xml`
 
 ```xml
 <dependencies>
