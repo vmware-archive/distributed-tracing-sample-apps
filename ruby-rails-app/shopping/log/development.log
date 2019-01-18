@@ -1,0 +1,78 @@
+Started POST "/shop/order" for ::1 at 2019-01-18 15:04:22 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 15:04:23 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 15:04:25 +0530
+Started POST "/shop/menu" for ::1 at 2019-01-18 15:32:30 +0530
+Started POST "/shop/menu" for ::1 at 2019-01-18 15:32:45 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 15:33:32 +0530
+  
+NameError (undefined local variable or method `logger' for #<#<Class:0x5235b58>:0x51fb580>):
+  
+app/api/shopping.rb:9:in `block (2 levels) in <class:Shopping>'
+Started GET "/shop/menu" for ::1 at 2019-01-18 15:34:08 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 15:34:09 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 15:34:10 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 15:34:10 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 15:34:10 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 15:56:26 +0530
+Started GET "/shop/order" for ::1 at 2019-01-18 15:56:34 +0530
+Started GET "/shop/order" for ::1 at 2019-01-18 15:56:35 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 15:56:40 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 15:56:41 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 15:56:43 +0530
+Started POST "/shop/menu" for ::1 at 2019-01-18 15:59:58 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 16:00:05 +0530
+  
+NoMethodError (undefined method `render' for #<#<Class:0x399c438>:0x37d8c98>):
+  
+app/api/shopping.rb:16:in `block (2 levels) in <class:Shopping>'
+Started GET "/shop/menu" for ::1 at 2019-01-18 16:06:48 +0530
+  
+NoMethodError (undefined method `rack_response' for #<#<Class:0x504c138>:0x510ae30>):
+  
+app/api/shopping.rb:16:in `block (2 levels) in <class:Shopping>'
+Started GET "/shop/menu" for ::1 at 2019-01-18 16:11:36 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 16:11:37 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 16:12:00 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 16:12:18 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 16:13:12 +0530
+  
+SyntaxError (E:/ruby-2/shopping/app/api/shopping.rb:14: syntax error, unexpected tINTEGER, expecting keyword_do or '{' or '('
+            return JSON.parse(res.body), status 201
+                                                   ^):
+  
+app/api/shopping.rb:14: syntax error, unexpected tINTEGER, expecting keyword_do or '{' or '('
+config/routes.rb:3:in `block in <top (required)>'
+config/routes.rb:1:in `<top (required)>'
+Started GET "/shop/menu" for ::1 at 2019-01-18 16:36:35 +0530
+Started GET "/shop/menu" for ::1 at 2019-01-18 16:36:36 +0530
+Started GET "/shop/order" for ::1 at 2019-01-18 16:36:44 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 16:36:50 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 16:36:51 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 16:36:52 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 16:36:52 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 16:36:53 +0530
+Started POST "/shop/order" for ::1 at 2019-01-18 16:36:54 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 16:45:14 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 16:45:18 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 16:45:21 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 16:45:22 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 16:45:23 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:01:22 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:01:23 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:01:25 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:01:28 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:07:52 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:07:55 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:07:58 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:09:14 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:09:18 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:09:21 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:09:24 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:09:44 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:09:47 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:09:50 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:10:13 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:10:17 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:13:42 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:13:45 +0530
+Started POST "/shop/order" for 127.0.0.1 at 2019-01-18 17:13:48 +0530
