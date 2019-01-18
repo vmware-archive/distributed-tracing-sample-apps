@@ -1,12 +1,13 @@
 package com.wfsample.styling;
 
-import com.wavefront.sdk.jaxrs.client.WavefrontJaxrsClientFilter;
+import com.smoketurner.dropwizard.zipkin.ZipkinBundle;
+import com.smoketurner.dropwizard.zipkin.ZipkinFactory;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
+import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.ShirtDTO;
 import com.wfsample.common.dto.ShirtStyleDTO;
-import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
@@ -15,12 +16,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.core.Response;
 
+import brave.http.HttpTracing;
 import io.dropwizard.Application;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 import static java.util.stream.Collectors.toList;
@@ -41,14 +45,27 @@ public class StylingService extends Application<DropwizardServiceConfig> {
     new StylingService().run(args);
   }
 
+  // Add a ZipkinBundle to your Application class.
+  @Override
+  public void initialize(Bootstrap<DropwizardServiceConfig> bootstrap) {
+    bootstrap.addBundle(new ZipkinBundle<DropwizardServiceConfig>("stylingservice") {
+      @Override
+      public ZipkinFactory getZipkinFactory(DropwizardServiceConfig configuration) {
+        return configuration.getZipkinFactory();
+      }
+    });
+  }
+
   @Override
   public void run(DropwizardServiceConfig configuration, Environment environment) {
     String deliveryUrl = "http://" + configuration.getDeliveryHost() + ":" + configuration
         .getDeliveryPort();
-    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
-    // TODO: Initialize WavefrontJaxrsFilter here.
+
+    // Get the HttpTracing instance.
+    final Optional<HttpTracing> tracing = configuration.getZipkinFactory().build(environment);
+
     environment.jersey().register(new StylingWebResource(
-        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, wavefrontJaxrsFilter)));
+        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, tracing.get())));
   }
 
   public class StylingWebResource implements StylingApi {

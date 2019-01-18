@@ -1,5 +1,9 @@
 package com.wfsample.delivery;
 
+import com.smoketurner.dropwizard.zipkin.ZipkinBundle;
+import com.smoketurner.dropwizard.zipkin.ZipkinFactory;
+import com.smoketurner.dropwizard.zipkin.client.ZipkinClientBuilder;
+import com.smoketurner.dropwizard.zipkin.client.ZipkinClientConfiguration;
 import com.wfsample.common.DropwizardServiceConfig;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.DeliveryStatusDTO;
@@ -8,6 +12,8 @@ import com.wfsample.service.DeliveryApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -15,10 +21,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
 
+import brave.http.HttpTracing;
 import io.dropwizard.Application;
+import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.lifecycle.setup.ScheduledExecutorServiceBuilder;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 /**
@@ -42,10 +52,37 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
     new DeliveryService().run(args);
   }
 
+  // Add a ZipkinBundle to your Application class.
+  @Override
+  public void initialize(Bootstrap<DropwizardServiceConfig> bootstrap) {
+    bootstrap.addBundle(new ZipkinBundle<DropwizardServiceConfig>("deliveryservice") {
+      @Override
+      public ZipkinFactory getZipkinFactory(DropwizardServiceConfig configuration) {
+        return configuration.getZipkinFactory();
+      }
+    });
+  }
+
   @Override
   public void run(DropwizardServiceConfig configuration, Environment environment) {
+
+    // Get the HttpTracing instance.
+    final Optional<HttpTracing> tracing = configuration.getZipkinFactory().build(environment);
+
+    final Client client;
+    if (tracing.isPresent()) {
+      client =
+          new ZipkinClientBuilder(environment, tracing.get())
+              .build(configuration.getZipkinClient());
+    } else {
+      final ZipkinClientConfiguration clientConfig = configuration.getZipkinClient();
+      client =
+          new JerseyClientBuilder(environment)
+              .using(clientConfig)
+              .build(clientConfig.getServiceName());
+    }
     dispatchQueue = new ConcurrentLinkedDeque<>();
-    environment.jersey().register(new DeliveryWebResource());
+    environment.jersey().register(new DeliveryWebResource(client));
     ScheduledExecutorServiceBuilder sesBuilder =
         environment.lifecycle().scheduledExecutorService("Clear Queue");
     ScheduledExecutorService ses = sesBuilder.build();
@@ -75,7 +112,9 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
 
   public class DeliveryWebResource implements DeliveryApi {
 
-    DeliveryWebResource() {
+    private final Client client;
+    DeliveryWebResource(Client client) {
+      this.client = Objects.requireNonNull(client);
     }
 
     @Override

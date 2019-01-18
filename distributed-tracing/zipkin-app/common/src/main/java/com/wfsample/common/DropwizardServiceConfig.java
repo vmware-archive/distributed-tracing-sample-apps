@@ -1,6 +1,12 @@
 package com.wfsample.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.smoketurner.dropwizard.zipkin.ConsoleZipkinFactory;
+import com.smoketurner.dropwizard.zipkin.ZipkinFactory;
+import com.smoketurner.dropwizard.zipkin.client.ZipkinClientConfiguration;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import io.dropwizard.Configuration;
 
@@ -10,6 +16,22 @@ import io.dropwizard.Configuration;
  * @author Srujan Narkedamalli (snarkedamall@wavefront.com).
  */
 public class DropwizardServiceConfig extends Configuration {
+
+  @Valid @NotNull public final ZipkinFactory zipkin = new ConsoleZipkinFactory();
+
+  @Valid
+  @NotNull
+  private final ZipkinClientConfiguration zipkinClient = new ZipkinClientConfiguration();
+
+  @JsonProperty
+  public ZipkinFactory getZipkinFactory() {
+    return zipkin;
+  }
+
+  @JsonProperty
+  public ZipkinClientConfiguration getZipkinClient() {
+    return zipkinClient;
+  }
 
   /**
    * Port on which the styling service is running.
