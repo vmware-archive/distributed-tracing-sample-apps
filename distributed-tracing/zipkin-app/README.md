@@ -5,7 +5,7 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
 
 ## Running the Application locally 
 
-1. Run Jaeger in your env using the [Docker image](https://www.jaegertracing.io/docs/getting-started):
+1. Run Zipkin in your env using the [Docker image](https://zipkin.io/pages/quickstart.html):
 
    ```bash
    $ docker run -d -p 9411:9411 openzipkin/zipkin
@@ -13,12 +13,12 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
 
 2. `git clone` this repo and navigate to this dir:
 
-3. ```bash
+   ```bash
    git clone https://github.com/wavefrontHQ/hackathon.git
    cd hackathon/distributed-tracing/zipkin-app
    ```
 
-4. Run `mvn clean install` from the root directory of the project.
+4. Run `mvn clean install` from the root directory of this project.
 
 5. Now run all the services using the commands below:
 
@@ -38,7 +38,7 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
 
    ```bash
    // Kill the zipkin container.
-   $ docker ps -a | awk '{ print $1,$2 }' | grep openzipkin/zipkin | awk '{print $1 }' | xargs -I {} docker rm -f {}
+   $ docker ps -a | awk '{ print $1,$2 }' | grep openzipkin/zipkin | awk '{print $1 }' | xargs -I {} docker stop {}
    // Verify no zipkin containers are running. The below command should not return any containers.
    $ docker container ls | grep openzipkin/zipkin 
    ```
