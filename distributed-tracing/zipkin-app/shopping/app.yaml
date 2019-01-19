@@ -23,5 +23,5 @@ zipkin:
   baseUrl: http://localhost:9411/
 
 zipkinClient:
-  serviceName: shoppingservice
+  serviceName: shopping
   timeout: 10s

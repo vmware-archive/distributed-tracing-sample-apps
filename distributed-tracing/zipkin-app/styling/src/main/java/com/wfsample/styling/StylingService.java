@@ -48,7 +48,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
   // Add a ZipkinBundle to your Application class.
   @Override
   public void initialize(Bootstrap<DropwizardServiceConfig> bootstrap) {
-    bootstrap.addBundle(new ZipkinBundle<DropwizardServiceConfig>("stylingservice") {
+    bootstrap.addBundle(new ZipkinBundle<DropwizardServiceConfig>("styling") {
       @Override
       public ZipkinFactory getZipkinFactory(DropwizardServiceConfig configuration) {
         return configuration.getZipkinFactory();

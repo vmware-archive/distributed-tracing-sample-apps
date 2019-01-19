@@ -22,5 +22,5 @@ zipkin:
   baseUrl: http://localhost:9411/
 
 zipkinClient:
-  serviceName: stylingservice
+  serviceName: styling
   timeout: 10s

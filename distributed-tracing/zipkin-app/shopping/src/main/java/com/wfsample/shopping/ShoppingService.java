@@ -50,7 +50,7 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
   // Add a ZipkinBundle to your Application class.
   @Override
   public void initialize(Bootstrap<DropwizardServiceConfig> bootstrap) {
-    bootstrap.addBundle(new ZipkinBundle<DropwizardServiceConfig>("shoppingservice") {
+    bootstrap.addBundle(new ZipkinBundle<DropwizardServiceConfig>("shopping") {
       @Override
       public ZipkinFactory getZipkinFactory(DropwizardServiceConfig configuration) {
         return configuration.getZipkinFactory();
