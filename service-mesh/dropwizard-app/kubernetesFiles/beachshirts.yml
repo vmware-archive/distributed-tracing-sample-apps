@@ -1,0 +1,120 @@
+##################################################################################################
+# Shopping services
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: shoppingservice
+  labels:
+    app: shoppingservice
+
+spec:
+  ports:
+    - targetPort: 50050
+      port: 50050
+      name: http
+
+  selector:
+      app: shopping
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: shopping
+  labels:
+    app: istio-beachshirts
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: shopping
+
+    spec:
+      containers:
+        - name: shopping
+          image: us.gcr.io/wavefront-gcp-dev/akodali/shopping
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50050
+
+---
+##################################################################################################
+# Styling service
+##################################################################################################
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: stylingservice
+  labels:
+    app: stylingservice
+
+spec:
+  ports:
+    - targetPort: 50051
+      port: 50051
+      name: http
+
+  selector:
+      app: styling
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: styling
+
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: styling
+
+    spec:
+      containers:
+        - name: styling
+          image: us.gcr.io/wavefront-gcp-dev/akodali/styling
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50051
+---
+
+##################################################################################################
+# Delivery service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: deliveryservice
+  labels:
+    app: deliveryservice
+
+spec:
+  ports:
+    - targetPort: 50052
+      port: 50052
+      name: http
+
+  selector:
+      app: delivery
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: delivery
+
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: delivery
+
+    spec:
+      containers:
+        - name: delivery
+          image: us.gcr.io/wavefront-gcp-dev/akodali/delivery
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50052

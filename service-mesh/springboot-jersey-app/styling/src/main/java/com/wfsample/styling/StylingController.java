@@ -1,11 +1,11 @@
 package com.wfsample.styling;
 
-import com.wavefront.sdk.jaxrs.client.WavefrontJaxrsClientFilter;
+import com.wfsample.common.B3HeadersRequestFilter;
 import com.wfsample.common.BeachShirtsUtils;
+import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.ShirtDTO;
 import com.wfsample.common.dto.ShirtStyleDTO;
-import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import static java.util.stream.Collectors.toList;
@@ -30,17 +31,18 @@ import static java.util.stream.Collectors.toList;
 public class StylingController implements StylingApi {
   private final DeliveryApi deliveryApi;
   private List<ShirtStyleDTO> shirtStyleDTOS;
+  private B3HeadersRequestFilter b3Filter;
   private static Logger logger = LoggerFactory.getLogger(StylingService.class);
 
   StylingController() {
-    String deliveryUrl = "http://localhost:50052";
-    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
-    /**
-     * TODO: Initialize WavefrontJaxrsClientFilter in JerseyConfig.java, add an argument of it in
-     * the constructor as well and uncomment the following line to use it.
-     */
-    // wavefrontJaxrsFilter = wfJaxrsClientFilter;
-    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, wavefrontJaxrsFilter);
+    // Use the service alias for delivery service in Kubernetes.
+    String deliveryUrl = "http://deliveryservice:50052";
+    // Uncomment the below line to use localhost instead.
+    // String stylingUrl = "http://localhost:50052";
+
+    // Filter to propagate B3 headers.
+    b3Filter = new B3HeadersRequestFilter();
+    this.deliveryApi = BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, b3Filter);
     shirtStyleDTOS = new ArrayList<>();
     ShirtStyleDTO dto = new ShirtStyleDTO();
     dto.setName("style1");
@@ -52,11 +54,13 @@ public class StylingController implements StylingApi {
     shirtStyleDTOS.add(dto2);
   }
 
-  public List<ShirtStyleDTO> getAllStyles() {
+  public List<ShirtStyleDTO> getAllStyles(HttpHeaders httpHeaders) {
+    // Propagate B3 headers.
+    b3Filter.setB3Headers(httpHeaders);
     return this.shirtStyleDTOS;
   }
 
-  public Response makeShirts(String id, int quantity) {
+  public Response makeShirts(String id, int quantity, HttpHeaders httpHeaders) {
     /*
      * TODO: Try to report the value of quantity using WavefrontHistogram.
      *
@@ -68,7 +72,8 @@ public class StylingController implements StylingApi {
       String msg = "Failed to make shirts!";
       logger.warn(msg);
       return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
-    }
+    }      // Propagate B3 headers.
+    b3Filter.setB3Headers(httpHeaders);
     String orderNum = UUID.randomUUID().toString();
     List<ShirtDTO> packedShirts = new ArrayList<>();
     for (int i = 0; i < quantity; i++) {

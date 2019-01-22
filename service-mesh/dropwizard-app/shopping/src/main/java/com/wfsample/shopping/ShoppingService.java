@@ -1,6 +1,7 @@
 package com.wfsample.shopping;
 
 import com.wavefront.sdk.jaxrs.client.WavefrontJaxrsClientFilter;
+import com.wfsample.common.B3HeadersRequestFilter;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
 import com.wfsample.common.dto.DeliveryStatusDTO;
@@ -10,10 +11,13 @@ import com.wfsample.service.StylingApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -35,6 +39,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  */
 public class ShoppingService extends Application<DropwizardServiceConfig> {
   private static Logger logger = LoggerFactory.getLogger(ShoppingService.class);
+  private B3HeadersRequestFilter b3Filter;
 
   private ShoppingService() {
   }
@@ -47,10 +52,11 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
   public void run(DropwizardServiceConfig configuration, Environment environment) {
     String stylingUrl = "http://" + configuration.getStylingHost() + ":" + configuration
         .getStylingPort();
-    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
+    // Filter to propagate B3 headers.
+    b3Filter = new B3HeadersRequestFilter();
     // TODO: Initialize WavefrontJaxrsFilter here.
     environment.jersey().register(new ShoppingWebResource(
-        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, wavefrontJaxrsFilter)));
+        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, b3Filter)));
   }
 
   @Path("/shop")
@@ -65,20 +71,25 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     @GET
     @Path("/menu")
     public Response getShoppingMenu(@Context HttpHeaders httpHeaders) {
-      return Response.ok(stylingApi.getAllStyles()).build();
+      // Propagate B3 headers.
+      b3Filter.setB3Headers(httpHeaders);
+      return Response.ok(stylingApi.getAllStyles(httpHeaders)).build();
     }
 
     @POST
     @Path("/order")
     @Consumes(APPLICATION_JSON)
-    public Response orderShirts(OrderDTO orderDTO, @Context HttpHeaders httpHeaders) {
+    public Response orderShirts(OrderDTO orderDTO,
+                                @Context HttpHeaders httpHeaders) {
+      // Propagate B3 headers.
+      b3Filter.setB3Headers(httpHeaders);
       if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
         String msg = "Failed to order shirts!";
         logger.warn(msg);
         return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
       }
       Response deliveryResponse = stylingApi.makeShirts(
-          orderDTO.getStyleName(), orderDTO.getQuantity());
+          orderDTO.getStyleName(), orderDTO.getQuantity(), httpHeaders);
       if (deliveryResponse.getStatus() < 400) {
         DeliveryStatusDTO deliveryStatus = deliveryResponse.readEntity(DeliveryStatusDTO.class);
         return Response.ok().entity(deliveryStatus).build();
