@@ -1,6 +1,7 @@
 package com.wfsample.shopping;
 
-import com.wavefront.sdk.jaxrs.client.WavefrontJaxrsClientFilter;
+import com.smoketurner.dropwizard.zipkin.ZipkinBundle;
+import com.smoketurner.dropwizard.zipkin.ZipkinFactory;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
 import com.wfsample.common.dto.DeliveryStatusDTO;
@@ -10,6 +11,7 @@ import com.wfsample.service.StylingApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.Consumes;
@@ -22,7 +24,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import brave.http.HttpTracing;
 import io.dropwizard.Application;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -43,14 +47,26 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     new ShoppingService().run(args);
   }
 
+  // Add a ZipkinBundle to your Application class.
+  @Override
+  public void initialize(Bootstrap<DropwizardServiceConfig> bootstrap) {
+    bootstrap.addBundle(new ZipkinBundle<DropwizardServiceConfig>("shopping") {
+      @Override
+      public ZipkinFactory getZipkinFactory(DropwizardServiceConfig configuration) {
+        return configuration.getZipkinFactory();
+      }
+    });
+  }
   @Override
   public void run(DropwizardServiceConfig configuration, Environment environment) {
     String stylingUrl = "http://" + configuration.getStylingHost() + ":" + configuration
         .getStylingPort();
-    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
-    // TODO: Initialize WavefrontJaxrsFilter here.
+
+    // Get the HttpTracing instance.
+    final Optional<HttpTracing> tracing = configuration.getZipkinFactory().build(environment);
+
     environment.jersey().register(new ShoppingWebResource(
-        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, wavefrontJaxrsFilter)));
+        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, tracing.get())));
   }
 
   @Path("/shop")

@@ -8,3 +8,19 @@ server:
 
 deliveryPort: 50052
 deliveryHost: "localhost"
+
+
+# Zipkin-specific options.
+zipkin:
+  enabled: true
+  serviceHost: 127.0.0.1
+  servicePort: 50051
+  connectTimeout: 10s
+  readTimeout: 60s
+
+  collector: http
+  baseUrl: http://localhost:9411/
+
+zipkinClient:
+  serviceName: styling
+  timeout: 10s
