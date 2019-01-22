@@ -14,7 +14,7 @@ import javax.ws.rs.core.HttpHeaders;
  *
  * @author Anil Kodali (akodali@vmware.com)
  */
-public class B3HeadersRequestFilter implements ClientRequestFilter{
+public class B3HeadersRequestFilter implements ClientRequestFilter {
 
   private HttpHeaders httpHeaders;
 
