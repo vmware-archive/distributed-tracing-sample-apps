@@ -9,7 +9,9 @@ class Styling < Grape::API
     format :json
     resource :style do
         desc "List all styles"
+        use Rack::Tracer
         get do
+          sleep(1)
           [
               {
                   "name": "Wavefront",
@@ -24,6 +26,7 @@ class Styling < Grape::API
         get '/:id/make' do
           if rand(1..5) == 5
             message = "Random Service Unavailable!"
+            env['rack.span'].set_tag('error', true)
             puts message
             status 503
             return message
@@ -39,6 +42,7 @@ class Styling < Grape::API
           path = "/dispatch/" + order_num
           req = Net::HTTP::Post.new(path, initheader=headers)
           req.set_form_data({'shirts':shirts})
+          OpenTracing.inject(env['rack.span'].context, OpenTracing::FORMAT_RACK, req)
           res = client.request(req)
           if res.kind_of? Net::HTTPSuccess
             status 200
@@ -46,6 +50,7 @@ class Styling < Grape::API
           else
             message = "Failed to make shirts!"
             puts message
+            env['rack.span'].set_tag('error', true)
             status res.code.to_i
             return message
 

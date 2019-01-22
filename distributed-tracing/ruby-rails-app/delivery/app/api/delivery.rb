@@ -8,11 +8,14 @@ class Delivery < Grape::API
     format :json
     resource :dispatch do
         desc "Dispatch the order"
+        use Rack::Tracer
         post '/:order_num' do
+          sleep(1)
           order_num = params[:order_num]
           if rand(1..5) == 5
             message = "Random Service Unavailable!"
             puts message
+            env['rack.span'].set_tag('error', true)
             status 503
             return message
           end
@@ -23,6 +26,7 @@ class Delivery < Grape::API
           if !order_num
             message = "Invalid Order Num!"
             puts message
+            env['rack.span'].set_tag('error', true)
             status 400
             return message
           end
@@ -34,6 +38,7 @@ class Delivery < Grape::API
           if !packed_shirts
             message = "No shirts to deliver!"
             puts message
+            env['rack.span'].set_tag('error', true)
             status 400
             return message
           end
@@ -50,10 +55,12 @@ class Delivery < Grape::API
       desc "Retrieve Order"
       use Rack::Tracer
       post '/:order_num' do
+        sleep(1)
         order_num = params[:order_num]
         if !order_num
           message = "Invalid Order Num!"
           puts message
+          env['rack.span'].set_tag('error', true)
           status 400
           return message
         end
