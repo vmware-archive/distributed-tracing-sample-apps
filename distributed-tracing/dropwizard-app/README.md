@@ -107,9 +107,9 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 5. Now restart all the services again using below commands from root directory of the project.
 
    ```bash
-   java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar server ./shopping/app.yaml
-   java -jar ./styling/target/styling-1.0-SNAPSHOT.jar server ./styling/app.yaml
-   java -jar ./delivery/target/delivery-1.0-SNAPSHOT.jar server ./delivery/app.yaml
+   java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar server ./shopping/app.yaml &
+   java -jar ./styling/target/styling-1.0-SNAPSHOT.jar server ./styling/app.yaml &
+   java -jar ./delivery/target/delivery-1.0-SNAPSHOT.jar server ./delivery/app.yaml &
    ```
 6. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
