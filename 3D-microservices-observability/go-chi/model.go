@@ -16,7 +16,8 @@ type BeachShirtsConfig struct {
 	SimFailDelivery1 float32
 	SimFailDelivery2 float32
 	SimFailDelivery3 float32
-	SimDelayDelivery int // seconds
+	SimDelayChance   float32
+	SimDelayMS       int // milliseconds
 }
 
 var GlobalConfig BeachShirtsConfig
@@ -35,7 +36,8 @@ func InitGlobalConfig() {
 		SimFailDelivery1: 0.2,
 		SimFailDelivery2: 0.1,
 		SimFailDelivery3: 0.1,
-		SimDelayDelivery: 5,
+		SimDelayChance:   0.3333,
+		SimDelayMS:       1000,
 	}
 }
 

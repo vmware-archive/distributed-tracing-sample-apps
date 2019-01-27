@@ -44,11 +44,16 @@ func (s *StylingServer) Start() error {
 }
 
 func (s *StylingServer) getStyles(w http.ResponseWriter, r *http.Request) {
+
+	RandSimDelay()
+
 	out, _ := json.Marshal(s.Styles)
 	w.Write(out)
 }
 
 func (s *StylingServer) makeShirts(w http.ResponseWriter, r *http.Request) {
+
+	RandSimDelay()
 
 	if RAND.Float32() < GlobalConfig.SimFailStyling {
 		WriteError(w, "Failed to make shirts!", http.StatusServiceUnavailable)
@@ -72,6 +77,8 @@ func (s *StylingServer) makeShirts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	RandSimDelay()
+
 	if resp.StatusCode == http.StatusOK {
 		io.Copy(w, resp.Body)
 	} else {
@@ -82,5 +89,5 @@ func (s *StylingServer) makeShirts(w http.ResponseWriter, r *http.Request) {
 func callDeliveryDispatch(orderNum string, packedShirts PackedShirts) (*http.Response, error) {
 	deliveryURL := fmt.Sprintf("http://%s/delivery/dispatch/%s", GlobalConfig.DeliveryHost, orderNum)
 	dispatchBody, _ := json.Marshal(packedShirts)
-	return http.Post(deliveryURL, "application/json", bytes.NewReader(dispatchBody))
+	return POSTCall(deliveryURL, "application/json", bytes.NewReader(dispatchBody))
 }

@@ -58,7 +58,7 @@ func (s *DeliveryServer) Start() error {
 
 func (s *DeliveryServer) dispatch(w http.ResponseWriter, r *http.Request) {
 
-	time.Sleep(time.Duration(RAND.Intn(GlobalConfig.SimDelayDelivery)) * time.Second)
+	RandSimDelay()
 
 	if RAND.Float32() < GlobalConfig.SimFailDelivery1 {
 		WriteError(w, "Failed to dispatch shirts!", http.StatusServiceUnavailable)
@@ -92,6 +92,8 @@ func (s *DeliveryServer) dispatch(w http.ResponseWriter, r *http.Request) {
 
 	trackingNum := NewOrderNum()
 	log.Printf("Tracking number of Order: %s is %s\n", orderNum, trackingNum)
+
+	RandSimDelay()
 
 	status, _ := json.Marshal(DeliveryStatus{OrderNum: orderNum, TrackingNum: trackingNum, Status: "shirts delivery dispatched"})
 	w.Write(status)

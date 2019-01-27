@@ -25,7 +25,7 @@ func NewServer() *ShoppingServer {
 	server := &ShoppingServer{GlobalConfig.ShoppingHost, r}
 
 	r.Route("/shop", func(r chi.Router) {
-		r.Get("/menu", server.getMenu)
+		r.Get("/menu", server.getShoppingMenu)
 		r.Post("/order", server.orderShirts)
 	})
 
@@ -37,7 +37,7 @@ func (s *ShoppingServer) Start() error {
 	return http.ListenAndServe(s.HostURL, s.Router)
 }
 
-func (s *ShoppingServer) getMenu(w http.ResponseWriter, r *http.Request) {
+func (s *ShoppingServer) getShoppingMenu(w http.ResponseWriter, r *http.Request) {
 	resp, err := callGetAllStyles()
 	if err != nil {
 		WriteError(w, "Failed to get menu!", http.StatusPreconditionFailed)
@@ -46,6 +46,9 @@ func (s *ShoppingServer) getMenu(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *ShoppingServer) orderShirts(w http.ResponseWriter, r *http.Request) {
+
+	RandSimDelay()
+
 	var order Order
 	json.NewDecoder(r.Body).Decode(&order)
 
@@ -68,10 +71,10 @@ func (s *ShoppingServer) orderShirts(w http.ResponseWriter, r *http.Request) {
 
 func callGetAllStyles() (*http.Response, error) {
 	stylingURL := fmt.Sprintf("http://%s/style/", GlobalConfig.StylingHost)
-	return http.Get(stylingURL)
+	return GETCall(stylingURL, nil)
 }
 
 func callMakeShirts(order Order) (*http.Response, error) {
 	stylingURL := fmt.Sprintf("http://%s/style/%s/make?quantity=%d", GlobalConfig.StylingHost, order.StyleName, order.Quantity)
-	return http.Get(stylingURL)
+	return GETCall(stylingURL, nil)
 }
