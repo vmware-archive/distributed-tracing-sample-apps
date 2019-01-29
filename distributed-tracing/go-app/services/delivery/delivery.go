@@ -13,7 +13,7 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	otrext "github.com/opentracing/opentracing-go/ext"
 
-	. "wavefront.com/hackathon/beachshirts"
+	. "wavefront.com/hackathon/beachshirts/internal"
 )
 
 type DeliveryServer struct {
@@ -24,7 +24,7 @@ type DeliveryServer struct {
 	tracer opentracing.Tracer
 }
 
-func NewServer() *DeliveryServer {
+func NewServer() Server {
 	r := chi.NewRouter()
 	deliveryQueue := make(chan PackedShirts, GlobalConfig.DeliveryQueueSize)
 
@@ -89,7 +89,11 @@ func (s *DeliveryServer) dispatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var packedShirts PackedShirts
-	json.NewDecoder(r.Body).Decode(&packedShirts)
+	decerr := json.NewDecoder(r.Body).Decode(&packedShirts)
+	if decerr != nil {
+		WriteError(w, "Unmarshal error for packedShirts", http.StatusInternalServerError)
+		return
+	}
 
 	if RAND.Float32() < GlobalConfig.SimFailDelivery3 {
 		packedShirts = PackedShirts{}

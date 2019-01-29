@@ -1,6 +1,6 @@
 // 2019. Mahesh Voleti (mvoleti@vmware.com)
 
-package beachshirts
+package internal
 
 import (
 	"io"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	. "wavefront.com/hackathon/beachshirts"
+	. "wavefront.com/hackathon/beachshirts/internal"
 	"wavefront.com/hackathon/beachshirts/services/delivery"
 	"wavefront.com/hackathon/beachshirts/services/shopping"
 	"wavefront.com/hackathon/beachshirts/services/styling"

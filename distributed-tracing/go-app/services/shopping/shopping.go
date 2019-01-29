@@ -14,7 +14,7 @@ import (
 
 	"github.com/go-chi/chi"
 
-	. "wavefront.com/hackathon/beachshirts"
+	. "wavefront.com/hackathon/beachshirts/internal"
 )
 
 type ShoppingServer struct {
@@ -24,7 +24,7 @@ type ShoppingServer struct {
 	tracer opentracing.Tracer
 }
 
-func NewServer() *ShoppingServer {
+func NewServer() Server {
 	r := chi.NewRouter()
 
 	server := &ShoppingServer{GlobalConfig.ShoppingHost, r, opentracing.GlobalTracer()}
@@ -51,6 +51,8 @@ func (s *ShoppingServer) getShoppingMenu(w http.ResponseWriter, r *http.Request)
 		otrext.Error.Set(span, true)
 		WriteError(w, "Failed to get menu!", http.StatusPreconditionFailed)
 	}
+	defer resp.Body.Close()
+
 	io.Copy(w, resp.Body)
 }
 
@@ -61,7 +63,11 @@ func (s *ShoppingServer) orderShirts(w http.ResponseWriter, r *http.Request) {
 	RandSimDelay()
 
 	var order Order
-	json.NewDecoder(r.Body).Decode(&order)
+	decerr := json.NewDecoder(r.Body).Decode(&order)
+	if decerr != nil {
+		WriteError(w, "Invalid Request to order shirts!", http.StatusBadRequest)
+		return
+	}
 
 	if RAND.Float32() < GlobalConfig.SimFailShopping {
 		otrext.Error.Set(span, true)
@@ -75,6 +81,7 @@ func (s *ShoppingServer) orderShirts(w http.ResponseWriter, r *http.Request) {
 		WriteError(w, err.Error(), http.StatusPreconditionFailed)
 		return
 	}
+	defer resp.Body.Close()
 
 	RandSimDelay()
 

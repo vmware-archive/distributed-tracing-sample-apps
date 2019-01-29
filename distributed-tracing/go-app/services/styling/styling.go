@@ -15,7 +15,7 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	otrext "github.com/opentracing/opentracing-go/ext"
 
-	. "wavefront.com/hackathon/beachshirts"
+	. "wavefront.com/hackathon/beachshirts/internal"
 )
 
 type StylingServer struct {
@@ -27,9 +27,12 @@ type StylingServer struct {
 	tracer opentracing.Tracer
 }
 
-func NewServer() *StylingServer {
+func NewServer() Server {
 	r := chi.NewRouter()
-	styles := []ShirtStyle{{Name: "style1", ImageUrl: "style1Image"}, {Name: "style2", ImageUrl: "style2Image"}}
+	styles := []ShirtStyle{{Name: "beachops", ImageUrl: "beachopsImage"},
+		{Name: "style1", ImageUrl: "style1Image"},
+		{Name: "style2", ImageUrl: "style2Image"},
+	}
 
 	server := &StylingServer{GlobalConfig.StylingHost, r, styles, opentracing.GlobalTracer()}
 
@@ -69,7 +72,12 @@ func (s *StylingServer) makeShirts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := chi.URLParam(r, "id")
-	quantity, _ := strconv.Atoi(r.URL.Query().Get("quantity"))
+	quantity, parserr := strconv.Atoi(r.URL.Query().Get("quantity"))
+	if parserr != nil {
+		WriteError(w, "Parsing error for quantity!", http.StatusInternalServerError)
+		return
+	}
+
 	orderNum := NewOrderNum()
 
 	packedShirts := PackedShirts{Shirts: make([]Shirt, quantity)}
@@ -79,12 +87,12 @@ func (s *StylingServer) makeShirts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp, err := callDeliveryDispatch(orderNum, packedShirts, span.Context())
-
 	if err != nil {
 		otrext.Error.Set(span, true)
 		WriteError(w, "Failed to make shirts!", http.StatusPreconditionFailed)
 		return
 	}
+	defer resp.Body.Close()
 
 	RandSimDelay()
 
