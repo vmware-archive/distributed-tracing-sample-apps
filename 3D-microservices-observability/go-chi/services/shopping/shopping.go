@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-chi/chi"
 
-	. "wavefront.com/hackathon/beachshirts"
+	. "wavefront.com/hackathon/beachshirts/internal"
 )
 
 type ShoppingServer struct {
@@ -19,7 +19,7 @@ type ShoppingServer struct {
 	Router  *chi.Mux
 }
 
-func NewServer() *ShoppingServer {
+func NewServer() Server {
 	r := chi.NewRouter()
 
 	server := &ShoppingServer{GlobalConfig.ShoppingHost, r}
@@ -42,6 +42,8 @@ func (s *ShoppingServer) getShoppingMenu(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		WriteError(w, "Failed to get menu!", http.StatusPreconditionFailed)
 	}
+	defer resp.Body.Close()
+
 	io.Copy(w, resp.Body)
 }
 
@@ -50,7 +52,11 @@ func (s *ShoppingServer) orderShirts(w http.ResponseWriter, r *http.Request) {
 	RandSimDelay()
 
 	var order Order
-	json.NewDecoder(r.Body).Decode(&order)
+	decerr := json.NewDecoder(r.Body).Decode(&order)
+	if decerr != nil {
+		WriteError(w, "Invalid Request to order shirts!", http.StatusBadRequest)
+		return
+	}
 
 	if RAND.Float32() < GlobalConfig.SimFailShopping {
 		WriteError(w, "Failed to order shirts!", http.StatusServiceUnavailable)
@@ -62,6 +68,10 @@ func (s *ShoppingServer) orderShirts(w http.ResponseWriter, r *http.Request) {
 		WriteError(w, err.Error(), http.StatusPreconditionFailed)
 		return
 	}
+	defer resp.Body.Close()
+
+	RandSimDelay()
+
 	if resp.StatusCode == http.StatusOK {
 		io.Copy(w, resp.Body)
 	} else {
