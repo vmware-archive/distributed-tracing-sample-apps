@@ -1,0 +1,7 @@
+styling:
+  port: 3001
+  host: "localhost"
+delivery:
+  port: 3002
+  host: "localhost"
+
