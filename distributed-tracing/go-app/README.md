@@ -22,7 +22,7 @@ This is a sample Go application using `chi` router framework called beachshirts 
 2. `git clone` this repo and navigate to this dir:
     ```bash
     git clone https://github.com/wavefrontHQ/hackathon.git
-    cd hackathon/3D-microservices-observability/go-chi/
+    cd hackathon/distributed-tracing/go-app/
     ```
 
 3. Build the binary for services:
