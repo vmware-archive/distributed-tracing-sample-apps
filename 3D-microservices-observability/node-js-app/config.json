@@ -1,0 +1,14 @@
+{
+    "shopping": {
+        "host": "localhost",
+        "port": "3000"
+    },
+    "styling": {
+        "host": "localhost",
+        "port": "3001"
+    },
+    "delivery": {
+        "host": "localhost",
+        "port": "3002"
+    }
+}
