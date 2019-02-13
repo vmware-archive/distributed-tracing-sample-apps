@@ -4,32 +4,23 @@
 * @author Yogesh Prasad Kurmi (ykurmi@vmware.com)
 */
 const request = require('request');
+const utils = require('../utils')
 
-module.exports = function(app, config, log){
+module.exports = (app, config, log) => {
 
-    app.get('/shop/menu', function(req, res){
-        request.get("http://" + config.styling.host + ":" + config.styling.port + "/style",
-        function(error, httpResponse, body) {
-            return res.json(JSON.parse(body));
-        });
+    app.get('/shop/menu', (req, res) => {
+        return utils.getRequest(res, "/style/", {}, config.styling)
     });
 
-    app.post('/shop/order', function(req, res){
+    app.post('/shop/order', (req, res) => {
         if (Math.floor(Math.random() * 10) == 0) {
-            msg = "Failed to order shirts!";
+            let msg = "Failed to order shirts!";
             log.error(msg);
             return res.status(503).json({ error: msg });
         }
-
-        request.get({
-            url: "http://" + config.styling.host + ":" + config.styling.port + "/style/" + req.body.styleName + "/make",
-            headers: {"Content-Type":"application/json"},
-            qs: {"quantity":req.body.quantity}},
-            function(error, response, body) {
-                if (response.statusCode != 200){
-                    return res.status(response.statusCode).json(JSON.parse(body));
-                }
-            return res.json(JSON.parse(body));
-        });
+        return utils.getRequest(res,
+            `/style/${req.body.styleName}/make`,
+            {"quantity":req.body.quantity},
+            config.styling)
     });
 };  
