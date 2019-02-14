@@ -27,7 +27,7 @@ class Styling < Grape::API
           if rand(1..5) == 5
             message = "Random Service Unavailable!"
             env['rack.span'].set_tag('error', true)
-            puts message
+            Rails.logger.warn(message)
             status 503
             return message
           end
@@ -37,8 +37,8 @@ class Styling < Grape::API
             shirts.push({"name": params[:id], "imageUrl":  params[:id] + "-image"})
           end
           order_num = SecureRandom.uuid
-          headers = {'host':'localhost'}
-          client = Net::HTTP.new("localhost",3002)
+          headers = {'host':APP_CONFIG['styling']['host']}
+          client = Net::HTTP.new(APP_CONFIG['delivery']['host'],APP_CONFIG['delivery']['port'])
           path = "/dispatch/" + order_num
           req = Net::HTTP::Post.new(path, initheader=headers)
           req.set_form_data({'shirts':shirts})
@@ -49,7 +49,7 @@ class Styling < Grape::API
             return  JSON.parse(res.body)
           else
             message = "Failed to make shirts!"
-            puts message
+            Rails.logger.warn(message)
             env['rack.span'].set_tag('error', true)
             status res.code.to_i
             return message

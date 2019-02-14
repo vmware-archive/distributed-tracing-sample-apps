@@ -14,7 +14,7 @@ class Delivery < Grape::API
           order_num = params[:order_num]
           if rand(1..5) == 5
             message = "Random Service Unavailable!"
-            puts message
+            Rails.logger.warn(message)
             env['rack.span'].set_tag('error', true)
             status 503
             return message
@@ -25,7 +25,7 @@ class Delivery < Grape::API
 
           if !order_num
             message = "Invalid Order Num!"
-            puts message
+            Rails.logger.warn(message)
             env['rack.span'].set_tag('error', true)
             status 400
             return message
@@ -37,7 +37,7 @@ class Delivery < Grape::API
 
           if !packed_shirts
             message = "No shirts to deliver!"
-            puts message
+            Rails.logger.warn(message)
             env['rack.span'].set_tag('error', true)
             status 400
             return message
@@ -59,7 +59,7 @@ class Delivery < Grape::API
         order_num = params[:order_num]
         if !order_num
           message = "Invalid Order Num!"
-          puts message
+          Rails.logger.warn(message)
           env['rack.span'].set_tag('error', true)
           status 400
           return message
