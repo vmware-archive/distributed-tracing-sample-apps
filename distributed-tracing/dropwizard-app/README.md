@@ -52,7 +52,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
        <version>${latest}</version>
      </dependency>
      ...
-   </dependencies> 
+   </dependencies>
    ```
 
 2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.34:
@@ -85,7 +85,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
    ```java
    public static Tracer init(String service) throws IOException {
        WavefrontProxyClient.Builder wfProxyClientBuilder = new WavefrontProxyClient.
-           Builder("localhost").metricsPort(2878).tracingPort(30000);
+           Builder("localhost").metricsPort(2878).tracingPort(30000).distributionPort(40000);
        WavefrontSender wavefrontSender = wfProxyClientBuilder.build();
        /**
         * TODO: You need to assign your microservices application a name.
