@@ -1,7 +1,13 @@
 {
   "name": "beachshirt",
   "version": "1.0.0",
-  "description": "beachshirt application which makes cool shirts for the beach.",
+  "description": "Beachshirt application which makes cool shirts for the beach.",
+  "homepage": "https://github.com/wavefrontHQ/hackathon/blob/master/3D-microservices-observability/node-js-app/README.md",
+  "bugs": {
+    "url" : "https://github.com/wavefrontHQ/hackathon/issues",
+    "email" : "ykurmi@vmware.com"
+  },
+  "keywords": [],
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,6 +19,7 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "log4js": "^4.0.2",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "uuid4": "^1.1.4"
   }
 }

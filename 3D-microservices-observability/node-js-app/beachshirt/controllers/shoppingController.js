@@ -13,10 +13,10 @@ module.exports = (app, config, log) => {
     });
 
     app.post('/shop/order', (req, res) => {
-        if (Math.floor(Math.random() * 10) == 0) {
-            let msg = "Failed to order shirts!";
-            log.error(msg);
-            return res.status(503).json({ error: msg });
+        if (Math.floor(Math.random() * 10) === 0) {
+            const error = "Failed to order shirts!";
+            log.error(error);
+            return res.status(503).json({ error: error });
         }
         return utils.getRequest(res,
             `/style/${req.body.styleName}/make`,
