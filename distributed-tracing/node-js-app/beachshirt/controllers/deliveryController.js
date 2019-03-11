@@ -9,11 +9,11 @@ module.exports = (app, log, tracer) => {
 
     app.post('/dispatch/:orderNum/', (req, res) => {
         const parentSpanContext = tracer.extract(FORMAT_HTTP_HEADERS, req.headers)
-        let span = tracer.startSpan('/dispatch', {
+        const span = tracer.startSpan('/dispatch', {
             childOf: parentSpanContext,
             tags: {[Tags.SPAN_KIND]: Tags.SPAN_KIND_RPC_SERVER}
         });
-        let orderNum = req.params.orderNum;
+        const orderNum = req.params.orderNum;
         let shirts = JSON.parse(req.body.shirts);
         if (Math.floor(Math.random() * 5) === 0) {
             const error = "Failed to dispatch shirts!";
@@ -21,7 +21,7 @@ module.exports = (app, log, tracer) => {
             span.setTag(Tags.HTTP_STATUS_CODE, 503)
             span.setTag(Tags.ERROR, true)
             span.finish();
-            return res.status(503).json({ error: error });
+            return res.status(503).json({error});
         }
 
         if (Math.floor(Math.random() * 10) === 0) {
@@ -30,7 +30,7 @@ module.exports = (app, log, tracer) => {
             span.setTag(Tags.HTTP_STATUS_CODE, 400)
             span.setTag(Tags.ERROR, true)
             span.finish();
-            return res.status(400).json({ error: error });
+            return res.status(400).json({error});
         }
 
         if (Math.floor(Math.random() * 10) === 0) {
@@ -42,7 +42,7 @@ module.exports = (app, log, tracer) => {
             span.setTag(Tags.HTTP_STATUS_CODE, 400)
             span.setTag(Tags.ERROR, true)
             span.finish();
-            return res.status(400).json({ error: error });
+            return res.status(400).json({error});
         }
         trackingNum = uuid4()
 
@@ -55,15 +55,15 @@ module.exports = (app, log, tracer) => {
     });
 
     app.post('/retrieve/:orderNum/', (req, res) => {
-        let span = tracer.startSpan('/retrieve');
-        let orderNum = req.params.orderNum;
+        const span = tracer.startSpan('/retrieve');
+        const orderNum = req.params.orderNum;
         if (orderNum === null){
             const error = "Invalid Order Num";
             log.error(error);
             span.setTag(Tags.HTTP_STATUS_CODE, 400)
             span.setTag(Tags.ERROR, true)
             span.finish();
-            return res.status(400).json({ error: error });
+            return res.status(400).json({error});
         }
         span.setTag(Tags.HTTP_STATUS_CODE, 200)
         span.finish();

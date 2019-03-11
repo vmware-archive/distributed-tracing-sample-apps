@@ -59,27 +59,27 @@ exports.getRequest = (res, api, param, service, span, tracer) => {
 
 // call post request
 exports.postRequest = (res, api, formData, service, span, tracer) => {
-  let http_url = `${this.getBaseUrl(service)}${api}`;
-  let http_headers = {"Content-Type":"application/json"};
-  span.setTag(Tags.HTTP_URL, http_url);
+  const httpUrl = `${this.getBaseUrl(service)}${api}`;
+  const httpHeaders = {"Content-Type":"application/json"};
+  span.setTag(Tags.HTTP_URL, httpUrl);
   span.setTag(Tags.HTTP_METHOD, 'POST');
   span.setTag(Tags.SPAN_KIND, Tags.SPAN_KIND_RPC_CLIENT);
   // Send span context via request headers (parent id etc.)
-  tracer.inject(span, FORMAT_HTTP_HEADERS, http_headers);
+  tracer.inject(span, FORMAT_HTTP_HEADERS, httpHeaders);
 
   request.post({
-    url: http_url,
-    headers: http_headers,
+    url: httpUrl,
+    headers: httpHeaders,
     form: formData
   }, (error, response, body) => {
     if(error){
-        span.setTag(Tags.HTTP_STATUS_CODE, 500)
-        span.setTag(Tags.ERROR, true)
+        span.setTag(Tags.HTTP_STATUS_CODE, 500);
+        span.setTag(Tags.ERROR, true);
         span.finish();
-        return res.status(500).json({'error': error.message})
+        return res.status(500).json({error: error.message});
     }
-      span.setTag(Tags.HTTP_STATUS_CODE, response.statusCode)
-      span.finish();
-      return res.status(response.statusCode).json(JSON.parse(body));
+    span.setTag(Tags.HTTP_STATUS_CODE, response.statusCode);
+    span.finish();
+    return res.status(response.statusCode).json(JSON.parse(body));
  })
 }

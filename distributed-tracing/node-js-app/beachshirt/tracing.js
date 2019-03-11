@@ -2,13 +2,13 @@ const jaegerTracer = require('jaeger-client').initTracer;
 
 module.exports.initTracer = (serviceName) => {
   const config = {
-    serviceName: serviceName,
+    serviceName,
     sampler: {
       type: "const",
       param: 1,
     },
     reporter: {
-       agentHost: "127.0.0.1",
+       agentHost: "10.192.213.225",
        agentPort: 6832,
     },
   };
