@@ -113,4 +113,4 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
    ```
 6. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-7. Now all the traces should be sent to Wavefront. Go to the UI and click on Browse -> Traces.
+7. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.

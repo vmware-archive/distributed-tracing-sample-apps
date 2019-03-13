@@ -82,17 +82,17 @@ This is a sample Python application using Django Framework called beachshirts (#
                                       service="<SERVICE_NAME>",
                                       cluster="<CLUSTER_NAME>",
                                       shard="<SHARD_NAME>")
-   
+
    proxy_client = WavefrontProxyClient(
        host="<PROXY_HOST>",
        tracing_port=30000,
        distribution_port=40000,
        metrics_port=2878
    )
-   
+
    proxy_reporter = WavefrontSpanReporter(client=proxy_client)
-   
-   TRACER = WavefrontTracer(reporter=proxy_reporter, application_tags=application_tags) 
+
+   TRACER = WavefrontTracer(reporter=proxy_reporter, application_tags=application_tags)
    ```
 
 5. Now restart all the services again using below commands from root directory of the project.
@@ -105,4 +105,4 @@ This is a sample Python application using Django Framework called beachshirts (#
 
 6. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-7. Now all the metrics, histograms and traces should be sent to Wavefront. Go to the UI and click on Browse -> Applications.
+7. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
