@@ -1,0 +1,7 @@
+application: beachshirts-Level-3-SDK
+cluster: us-west-1
+service: delivery
+shard: primary
+customTags:
+  location: Palo-Alto
+  env: Staging
