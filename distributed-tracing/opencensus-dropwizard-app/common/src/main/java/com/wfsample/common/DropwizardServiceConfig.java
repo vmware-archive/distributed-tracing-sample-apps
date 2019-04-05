@@ -35,6 +35,17 @@ public class DropwizardServiceConfig extends Configuration {
   @JsonProperty
   private String deliveryHost = "deliveryService";
 
+
+  @JsonProperty
+  private String ShoppingOCAgent = "localhost:55678";
+
+  @JsonProperty
+  private String StylingOCAgent = "localhost:55679";
+
+  @JsonProperty
+  private String DeliveryOCAgent = "localhost:55680";
+
+
   public int getStylingPort() {
     return stylingPort;
   }
@@ -49,5 +60,17 @@ public class DropwizardServiceConfig extends Configuration {
 
   public String getDeliveryHost() {
     return deliveryHost;
+  }
+
+  public String getShoppingOCAgent() {
+    return ShoppingOCAgent;
+  }
+
+  public String getStylingOCAgent() {
+    return StylingOCAgent;
+  }
+
+  public String getDeliveryOCAgent() {
+    return DeliveryOCAgent;
   }
 }

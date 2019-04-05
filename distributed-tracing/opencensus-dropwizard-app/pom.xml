@@ -87,14 +87,20 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.opentracing.contrib</groupId>
-            <artifactId>opentracing-jaxrs2</artifactId>
-            <version>0.2.1</version>
+            <groupId>io.opencensus</groupId>
+            <artifactId>opencensus-api</artifactId>
+            <version>0.20.0</version>
         </dependency>
         <dependency>
-            <groupId>com.wavefront</groupId>
-            <artifactId>wavefront-jaxrs-sdk-java</artifactId>
-            <version>0.9.0</version>
+            <groupId>io.opencensus</groupId>
+            <artifactId>opencensus-impl</artifactId>
+            <version>0.20.0</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.opencensus</groupId>
+            <artifactId>opencensus-exporter-trace-ocagent</artifactId>
+            <version>0.20.0</version>
         </dependency>
     </dependencies>
 

@@ -1,8 +1,8 @@
 package com.wfsample.styling;
 
-import com.wavefront.sdk.jaxrs.client.WavefrontJaxrsClientFilter;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
+import com.wfsample.common.TraceUtils;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.ShirtDTO;
 import com.wfsample.common.dto.ShirtStyleDTO;
@@ -10,6 +10,10 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
+import io.opencensus.common.Scope;
+import io.opencensus.trace.Status;
+import io.opencensus.trace.Tracer;
+import io.opencensus.trace.Tracing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.dropwizard.Application;
@@ -34,6 +39,8 @@ import static java.util.stream.Collectors.toList;
 public class StylingService extends Application<DropwizardServiceConfig> {
   private static Logger logger = LoggerFactory.getLogger(StylingService.class);
 
+  private static final Tracer tracer = Tracing.getTracer();
+
   private StylingService() {
   }
 
@@ -45,10 +52,12 @@ public class StylingService extends Application<DropwizardServiceConfig> {
   public void run(DropwizardServiceConfig configuration, Environment environment) {
     String deliveryUrl = "http://" + configuration.getDeliveryHost() + ":" + configuration
         .getDeliveryPort();
-    WavefrontJaxrsClientFilter wavefrontJaxrsFilter = null;
-    // TODO: Initialize WavefrontJaxrsFilter here.
+
+    TraceUtils.initializeTracing(configuration.getStylingOCAgent());
+    //environment.jersey().register(new JaxrsContainerFilter());
+
     environment.jersey().register(new StylingWebResource(
-        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, wavefrontJaxrsFilter)));
+        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class)));
   }
 
   public class StylingWebResource implements StylingApi {
@@ -68,40 +77,38 @@ public class StylingService extends Application<DropwizardServiceConfig> {
       shirtStyleDTOS.add(dto2);
     }
 
-    public List<ShirtStyleDTO> getAllStyles() {
-      return shirtStyleDTOS;
+    public List<ShirtStyleDTO> getAllStyles(HttpHeaders httpHeaders) {
+      try (Scope scope = TraceUtils.StartSpan(tracer, "getAllStyles", httpHeaders)) {
+        return shirtStyleDTOS;
+      }
     }
 
-    public Response makeShirts(String id, int quantity) {
-      /*
-       * TODO: Try to report the value of quantity using WavefrontHistogram.
-       * Important: Make sure you are sending to Minute bin instead of Hour or Day bin!
-       *
-       * Viewing the quantity requested by various clients as a minute distribution and then
-       * applying statistical functions (median, mean, min, max, p95, p99 etc.) on that data is
-       * really useful to understand the user trend.
-       */
-      if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
-        String msg = "Failed to make shirts!";
-        logger.warn(msg);
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
-      }
-      String orderNum = UUID.randomUUID().toString();
-      List<ShirtDTO> packedShirts = new ArrayList<>();
-      for (int i = 0; i < quantity; i++) {
-        packedShirts.add(new ShirtDTO(new ShirtStyleDTO(id, id + "Image")));
-      }
-      PackedShirtsDTO packedShirtsDTO = new PackedShirtsDTO(packedShirts.stream().
-          map(shirt -> new ShirtDTO(
-              new ShirtStyleDTO(shirt.getStyle().getName(), shirt.getStyle().getImageUrl()))).
-          collect(toList()));
-      Response deliveryResponse = deliveryApi.dispatch(orderNum, packedShirtsDTO);
-      if (deliveryResponse.getStatus() < 400) {
-        return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
-      } else {
-        String msg = "Failed to make shirts!";
-        logger.warn(msg);
-        return Response.status(deliveryResponse.getStatus()).entity(msg).build();
+    public Response makeShirts(String id, int quantity, HttpHeaders httpHeaders) {
+      try (Scope scope = TraceUtils.StartSpan(tracer, "makeShirts", httpHeaders)) {
+        if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
+          tracer.getCurrentSpan().setStatus(Status.INTERNAL);
+          String msg = "Failed to make shirts!";
+          logger.warn(msg);
+          return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
+        }
+        String orderNum = UUID.randomUUID().toString();
+        List<ShirtDTO> packedShirts = new ArrayList<>();
+        for (int i = 0; i < quantity; i++) {
+          packedShirts.add(new ShirtDTO(new ShirtStyleDTO(id, id + "Image")));
+        }
+        PackedShirtsDTO packedShirtsDTO = new PackedShirtsDTO(packedShirts.stream().
+                map(shirt -> new ShirtDTO(
+                        new ShirtStyleDTO(shirt.getStyle().getName(), shirt.getStyle().getImageUrl()))).
+                collect(toList()));
+        Response deliveryResponse = deliveryApi.dispatch(orderNum, packedShirtsDTO, httpHeaders);
+        if (deliveryResponse.getStatus() < 400) {
+          return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
+        } else {
+          tracer.getCurrentSpan().setStatus(Status.UNAVAILABLE);
+          String msg = "Failed to make shirts!";
+          logger.warn(msg);
+          return Response.status(deliveryResponse.getStatus()).entity(msg).build();
+        }
       }
     }
   }

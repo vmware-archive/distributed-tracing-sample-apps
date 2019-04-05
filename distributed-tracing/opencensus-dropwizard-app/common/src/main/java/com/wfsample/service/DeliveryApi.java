@@ -7,6 +7,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -22,9 +24,10 @@ public interface DeliveryApi {
   @POST
   @Path("dispatch/{orderNum}")
   @Consumes(MediaType.APPLICATION_JSON)
-  Response dispatch(@PathParam("orderNum") String orderNum, PackedShirtsDTO shirts);
+  Response dispatch(@PathParam("orderNum") String orderNum, PackedShirtsDTO shirts,
+                    @Context HttpHeaders httpHeaders);
 
   @POST
   @Path("return/{orderNum}")
-  Response retrieve(@PathParam("orderNum") String orderNum);
+  Response retrieve(@PathParam("orderNum") String orderNum, @Context HttpHeaders httpHeaders);
 }

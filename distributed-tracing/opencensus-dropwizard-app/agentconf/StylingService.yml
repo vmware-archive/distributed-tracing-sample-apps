@@ -1,0 +1,19 @@
+receivers:
+  opencensus:
+    address: "localhost:55679"
+
+zpages:
+    disabled: true
+
+exporters:
+  wavefront:
+    enable_traces: true
+    enable_metrics: true
+    verbose_logging: true
+    application_name: "beachshirts-opencensus"
+    service_name: "styling-service"
+    proxy:
+      Host: "Proxy_IP"
+      MetricsPort: 2878
+      TracingPort: 30000
+      DistributionPort: 40000
