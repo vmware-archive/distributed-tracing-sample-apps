@@ -1,0 +1,27 @@
+server:
+  applicationConnectors:
+  - type: http
+    port: 50050
+  adminConnectors:
+  - type: http
+    port: 50150
+
+stylingPort: 50051
+deliveryPort: 50052
+stylingHost: "localhost"
+deliveryHost: "localhost"
+
+# Zipkin-specific options.
+zipkin:
+  enabled: true
+  serviceHost: 127.0.0.1
+  servicePort: 50050
+  connectTimeout: 10s
+  readTimeout: 60s
+
+  collector: http
+  baseUrl: http://localhost:9411/
+
+zipkinClient:
+  serviceName: shopping
+  timeout: 10s

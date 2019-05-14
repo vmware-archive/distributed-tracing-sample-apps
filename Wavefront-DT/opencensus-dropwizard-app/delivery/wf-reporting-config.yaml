@@ -1,0 +1,6 @@
+# Reporting through direct ingestion
+reportingMechanism: "direct"
+server: "https://virunga.wavefront.com"
+token: "4056c005-f557-4ca1-b699-83d5f86e1d93"
+source: "wavefront-tracing-example"
+reportTraces: true

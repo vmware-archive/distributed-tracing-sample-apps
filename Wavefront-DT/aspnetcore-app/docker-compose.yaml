@@ -1,0 +1,41 @@
+﻿version: '2'
+
+services:
+  shopping_service:
+    image: beachshirts-shopping:latest
+    environment:
+      - ASPNETCORE_URLS=http://+:50050
+      - StylingHost=styling_service
+    build:
+      dockerfile: BeachShirts.Shopping.Dockerfile
+      context: ./src
+    ports:
+      - "50050:50050"
+    restart: always
+    links:
+      - styling_service
+
+  styling_service:
+    image: beachshirts-styling:latest
+    environment:
+      - ASPNETCORE_URLS=http://+:50051
+      - DeliveryHost=delivery_service
+    build:
+      dockerfile: BeachShirts.Styling.Dockerfile
+      context: ./src
+    ports:
+      - "50051:50051"
+    restart: always
+    links:
+      - delivery_service
+
+  delivery_service:
+    image: beachshirts-delivery:latest
+    environment:
+      - ASPNETCORE_URLS=http://+:50052
+    build:
+      dockerfile: BeachShirts.Delivery.Dockerfile
+      context: ./src
+    ports:
+      - "50052:50052"
+    restart: always
