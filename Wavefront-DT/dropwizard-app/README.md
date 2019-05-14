@@ -4,31 +4,16 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 
 ## Running the Application Locally
 
-1. Run Jaeger in your env using the [Docker image](https://www.jaegertracing.io/docs/getting-started):
+1. `git clone` this repo and navigate to this dir:
 
-   ```bash
-   $ docker run -d --name jaeger \
-     -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
-     -p 5775:5775/udp \
-     -p 6831:6831/udp \
-     -p 6832:6832/udp \
-     -p 5778:5778 \
-     -p 16686:16686 \
-     -p 14268:14268 \
-     -p 9411:9411 \
-     jaegertracing/all-in-one:1.8
-   ```
-
-2. `git clone` this repo and navigate to this dir:
-
-3. ```bash
+2. ```bash
    git clone https://github.com/wavefrontHQ/hackathon.git
-   cd hackathon/distributed-tracing/dropwizard-app
+   cd hackathon/Wavefront-DT/dropwizard-app
    ```
 
-4. Run `mvn clean install` from the root directory of the project.
+3. Run `mvn clean install` from the root directory of the project.
 
-5. Now run all the services using the commands below:
+4. Now run all the services using the commands below:
 
    ```bash
    java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar server ./shopping/app.yaml
@@ -37,9 +22,9 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
    ```
 
 - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
-- Now go to Jaeger UI (http://localhost:16686, if you're using all-in-one docker image as given above) and look for the traces for service "shopping" and click on Find Traces.
+- This app is instrumented with a NoopTracer. Next step is to switch from NoopTracer to WavefrontTracer to see the traces emitted from beachshirts application to Wavefront.
 
-## Change from Jaeger to Wavefront
+## Use Wavefront Tracer
 
 1. Add dependency of [`Wavefront Opentracing SDK`](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java) to the `pom.xml`:
 
@@ -55,7 +40,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
    </dependencies>
    ```
 
-2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.34:
+2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.36:
 
    * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
@@ -80,7 +65,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 
 3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
-4. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `com.uber.jaeger.Tracer` as follows:
+4. Go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) as follows:
 
    ```java
    public static Tracer init(String service) throws IOException {
