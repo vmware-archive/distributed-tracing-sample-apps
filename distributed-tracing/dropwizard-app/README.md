@@ -102,6 +102,16 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
    }
    ```
 
+   You would also need to add these additional imports to the `Tracing.java` class:
+   ```java
+   import com.wavefront.opentracing.WavefrontTracer;
+   import com.wavefront.opentracing.reporting.Reporter;
+   import com.wavefront.opentracing.reporting.WavefrontSpanReporter;
+   import com.wavefront.sdk.common.WavefrontSender;
+   import com.wavefront.sdk.common.application.ApplicationTags;
+   import com.wavefront.sdk.proxy.WavefrontProxyClient;
+   ```
+
    After making all the code changes, run `mvn clean install` from the root directory of the project.
 
 5. Now restart all the services again using below commands from root directory of the project.
