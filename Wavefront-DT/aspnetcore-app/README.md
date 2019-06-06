@@ -31,11 +31,11 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
    dotnet add src/BeachShirts.Common/BeachShirts.Common.csproj package Wavefront.OpenTracing.SDK.CSharp
    ```
 
-2. You can send data to Wavefront either using one of the 2 options below -
+2. You can send data to Wavefront either using one of the 2 options below:
 
-**Option A** - via Direct Ingestion
+   * **Option A** - via Direct Ingestion
 
-**Option B** - via Wavefront Proxy
+   * **Option B** - via Wavefront Proxy
 
 **Option A** - If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
@@ -44,6 +44,7 @@ Now go to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs` and change the `ITr
    ```csharp
    public static ITracer Init(string service)
    {
+       // TODO: Replace {cluster} with your wavefront URL and obtain wavefront API token
        var wfDirectIngestionClientBuilder = new WavefrontDirectIngestionClient.Builder(
            "https://{cluster}.wavefront.com", <wf_API_token>);
        var wavefrontSender = wfDirectIngestionClientBuilder.Build();
@@ -82,27 +83,37 @@ Now go to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs` and change the `ITr
           wavefronthq/proxy:latest
      ```
 
- Now go to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs` and change the `ITracer Init(string service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-csharp#set-up-a-tracer) as follows:
+Now go to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs` and change the `ITracer Init(string service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-csharp#set-up-a-tracer) as follows:
 
-    ```csharp
-    public static ITracer Init(string service)
-    {
-        var wfProxyClientBuilder = new WavefrontProxyClient.Builder("localhost")
-            .MetricsPort(2878).TracingPort(30000).DistributionPort(40000);
-        var wavefrontSender = wfProxyClientBuilder.Build();
-        /*
-         * TODO: You need to assign your microservices application a name.
-         * For this hackathon, please prepend your name (example: "John") to the BeachShirts application,
-         * for example: applicationName = "John-BeachShirts"
-         */
-        var applicationTags = new ApplicationTags.Builder(applicationName, service).Build();
-        var wfSpanReporter = new WavefrontSpanReporter.Builder().Build(wavefrontSender);
-        var wfTracerBuilder = new WavefrontTracer.Builder(wfSpanReporter, applicationTags);
-        return wfTracerBuilder.Build();
-    }
-    ```
+   ```csharp
+   public static ITracer Init(string service)
+   {
+       var wfProxyClientBuilder = new WavefrontProxyClient.Builder("localhost")
+           .MetricsPort(2878).TracingPort(30000).DistributionPort(40000);
+       var wavefrontSender = wfProxyClientBuilder.Build();
+       /*
+        * TODO: You need to assign your microservices application a name.
+        * For this hackathon, please prepend your name (example: "John") to the BeachShirts application,
+        * for example: applicationName = "John-BeachShirts"
+        */
+       var applicationTags = new ApplicationTags.Builder(applicationName, service).Build();
+       var wfSpanReporter = new WavefrontSpanReporter.Builder().Build(wavefrontSender);
+       var wfTracerBuilder = new WavefrontTracer.Builder(wfSpanReporter, applicationTags);
+       return wfTracerBuilder.Build();
+   }
+   ```
 
-3. Now restart all the services again using below commands from root directory of the project.
+3. Make sure you add the following imports to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs`:
+
+   ```csharp
+   using Wavefront.OpenTracing.SDK.CSharp;
+   using Wavefront.OpenTracing.SDK.CSharp.Reporting;
+   using Wavefront.SDK.CSharp.Common.Application;
+   using Wavefront.SDK.CSharp.DirectIngestion;
+   using Wavefront.SDK.CSharp.Proxy;
+   ```
+
+4. Now restart all the services again using below commands from root directory of the project.
 
 ```bash
 dotnet run --project src/BeachShirts.Shopping/BeachShirts.Shopping.csproj
@@ -110,6 +121,6 @@ dotnet run --project src/BeachShirts.Styling/BeachShirts.Styling.csproj
 dotnet run --project src/BeachShirts.Delivery/BeachShirts.Delivery.csproj
 ```
 
-4. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+5. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-5. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
+6. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
