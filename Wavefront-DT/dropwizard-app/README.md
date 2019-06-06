@@ -53,10 +53,10 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
 
    ```java
    public static Tracer init(String service) {
-    // TODO: Replace DOMAIN with wavefront URL and obtain wavefront API token
+    // TODO: Replace {cluster} with your wavefront URL and obtain wavefront API token
     WavefrontDirectIngestionClient.Builder wfDirectIngestionClientBuilder = 
             new WavefrontDirectIngestionClient.Builder(
-            "https://DOMAIN.wavefront.com", <wf_API_token>);
+            "https://{cluster}.wavefront.com", <wf_API_token>);
     WavefrontSender wavefrontSender = wfDirectIngestionClientBuilder.build();
     
     /**
@@ -67,7 +67,7 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
     ApplicationTags applicationTags = new ApplicationTags.Builder(applicationName,
             service).build();
     Reporter wfSpanReporter = new WavefrontSpanReporter.Builder().
-            withSource("wavefront-tracing-example").build(wavefrontSender);
+            build(wavefrontSender);
     WavefrontTracer.Builder wfTracerBuilder = new WavefrontTracer.
             Builder(wfSpanReporter, applicationTags);
     return wfTracerBuilder.build();
@@ -114,7 +114,7 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
        ApplicationTags applicationTags = new ApplicationTags.Builder(applicationName,
            service).build();
        Reporter wfSpanReporter = new WavefrontSpanReporter.Builder().
-           withSource("wavefront-tracing-example").build(wavefrontSender);
+           build(wavefrontSender);
        WavefrontTracer.Builder wfTracerBuilder = new WavefrontTracer.
            Builder(wfSpanReporter, applicationTags);
        return wfTracerBuilder.build();
