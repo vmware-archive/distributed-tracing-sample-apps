@@ -7,7 +7,7 @@ This is a sample Python application using Django Framework called beachshirts (#
 
    ```bash
    git clone https://github.com/wavefrontHQ/hackathon.git
-   cd hackathon/distributed-tracing/django-app
+   cd hackathon/Wavefront-DT/django-app
    ```
 
 2. Run `pip3 install -r requirements.txt` from the root directory of the project (* **Note**: This sample app works only with Python 3 since it’s built with Django 2, but all the Wavefront Python SDKs are compatible with both Python 2 and 3).
@@ -22,7 +22,7 @@ This is a sample Python application using Django Framework called beachshirts (#
 
 4. Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
 
-5. This app is instrumented with a NoopTracer. Next step is to switch from MockTracer to WavefrontTracer to see the traces emitted from beachshirts application to Wavefront.
+5. This app is instrumented with a NoopTracer. Next step is to switch from NoopTracer to WavefrontTracer to see the traces emitted from beachshirts application to Wavefront.
 
 ## Use Wavefront Tracer
 
