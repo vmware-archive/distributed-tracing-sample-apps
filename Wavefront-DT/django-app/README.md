@@ -3,32 +3,16 @@
 This is a sample Python application using Django Framework called beachshirts (#[beachops](https://medium.com/@matthewzeier/thoughts-from-an-operations-wrangler-how-we-use-alerts-to-monitor-wavefront-71329c5e57a8)) which makes cool shirts for the beach.
 
 ## Running the Application Locally
-
-1. Run Jaeger in your env using the [Docker image](https://www.jaegertracing.io/docs/getting-started):
+1. `git clone` this repo and navigate to this dir:
 
    ```bash
-   $ docker run -d --name jaeger \
-     -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
-     -p 5775:5775/udp \
-     -p 6831:6831/udp \
-     -p 6832:6832/udp \
-     -p 5778:5778 \
-     -p 16686:16686 \
-     -p 14268:14268 \
-     -p 9411:9411 \
-     jaegertracing/all-in-one:1.8
-   ```
-
-2. `git clone` this repo and navigate to this dir:
-
-3. ```bash
    git clone https://github.com/wavefrontHQ/hackathon.git
-   cd hackathon/distributed-tracing/django-app
+   cd hackathon/Wavefront-DT/django-app
    ```
 
-4. Run `pip3 install -r requirements.txt` from the root directory of the project (* **Note**: This sample app works only with Python 3 since it’s built with Django 2, but all the Wavefront Python SDKs are compatible with both Python 2 and 3).
+2. Run `pip3 install -r requirements.txt` from the root directory of the project (* **Note**: This sample app works only with Python 3 since it’s built with Django 2, but all the Wavefront Python SDKs are compatible with both Python 2 and 3).
 
-5. Now run all the services using the commands below:
+3. Now run all the services using the commands below:
 
    ```bash
    python3 ./shopping/manage.py runserver 50050
@@ -36,10 +20,11 @@ This is a sample Python application using Django Framework called beachshirts (#
    python3 ./delivery/manage.py runserver 50052
    ```
 
-- Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
-- Now go to Jaeger UI (http://localhost:16686, if you're using all-in-one docker image as given above) and look for the traces for service "shopping" and click on Find Traces.
+4. Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
 
-## Change from Jaeger to Wavefront
+5. This app is instrumented with a NoopTracer. Next step is to switch from NoopTracer to WavefrontTracer to see the traces emitted from beachshirts application to Wavefront.
+
+## Use Wavefront Tracer
 
 1. Install [Wavefront Opentracing SDK](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python) via `pip`:
 
@@ -47,7 +32,37 @@ This is a sample Python application using Django Framework called beachshirts (#
    pip3 install wavefront-opentracing-sdk-python
    ```
 
-2. If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.33:
+2. You can send data to Wavefront either using one of the 2 options below:
+
+   * **Option A** - via Direct Ingestion
+   
+   * **Option B** - via Wavefront Proxy
+
+**Option A** - If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
+
+Go to `settings.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Jaeger Tracer as follows:
+
+   ```python
+   # Doc for Instantiating ApplicationTags:
+   # https://github.com/wavefrontHQ/wavefront-sdk-python/blob/master/docs/apptags.md
+
+   application_tags = ApplicationTags(application="<APP_NAME>",
+                                      service="<SERVICE_NAME>",
+                                      cluster="<CLUSTER_NAME>",
+                                      shard="<SHARD_NAME>")
+
+   direct_client = WavefrontDirectClient(
+    server="<SERVER_ADDR>",
+    token="<TOKEN>"
+   )
+
+   direct_reporter = WavefrontSpanReporter(client=direct_client)
+
+   TRACER = WavefrontTracer(reporter=direct_reporter, application_tags=application_tags)
+   ```
+
+
+**Option B** - If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.33:
 
    - See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
@@ -70,9 +85,7 @@ This is a sample Python application using Django Framework called beachshirts (#
          wavefronthq/proxy:latest
      ```
 
-3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
-
-4. Go to `settings.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Jaeger Tracer as follows:
+- Go to `settings.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Jaeger Tracer as follows:
 
    ```python
    # Doc for Instantiating ApplicationTags:
@@ -94,8 +107,8 @@ This is a sample Python application using Django Framework called beachshirts (#
 
    TRACER = WavefrontTracer(reporter=proxy_reporter, application_tags=application_tags)
    ```
-
-5. Now restart all the services again using below commands from root directory of the project.
+   
+3. Now restart all the services again using below commands from root directory of the project.
 
    ```bash
    python3 ./shopping/manage.py runserver 50050
@@ -103,6 +116,6 @@ This is a sample Python application using Django Framework called beachshirts (#
    python3 ./delivery/manage.py runserver 50052
    ```
 
-6. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+4. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-7. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
+5. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
