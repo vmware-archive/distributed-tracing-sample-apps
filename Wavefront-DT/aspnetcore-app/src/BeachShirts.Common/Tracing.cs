@@ -1,11 +1,9 @@
 ﻿using System;
-using Jaeger.Samplers;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging.Abstractions;
 using OpenTracing;
+using OpenTracing.Noop;
 using OpenTracing.Propagation;
 using OpenTracing.Tag;
-using static Jaeger.Configuration;
 
 namespace BeachShirts.Common
 {
@@ -13,15 +11,8 @@ namespace BeachShirts.Common
     {
         public static ITracer Init(string service)
         {
-            var loggerFactory = NullLoggerFactory.Instance;
-            var samplerConfig = SamplerConfiguration.FromEnv(loggerFactory)
-                .WithType(ConstSampler.Type)
-                .WithParam(1);
-            var reporterConfig = ReporterConfiguration.FromEnv(loggerFactory);
-            var config = new Jaeger.Configuration(service, loggerFactory)
-                .WithSampler(samplerConfig)
-                .WithReporter(reporterConfig);
-            return config.GetTracer();
+            // TODO: Replace this with Wavefront Tracer
+            return NoopTracerFactory.Create();
         }
 
         public static IScope StartServerSpan(
