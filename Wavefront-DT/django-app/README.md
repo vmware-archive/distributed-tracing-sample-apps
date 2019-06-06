@@ -22,7 +22,7 @@ This is a sample Python application using Django Framework called beachshirts (#
 
 4. Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
 
-5. This app is instrumented with a MockTracer. Next step is to switch from MockTracer to WavefrontTracer to see the traces emitted from beachshirts application to Wavefront.
+5. This app is instrumented with a NoopTracer. Next step is to switch from MockTracer to WavefrontTracer to see the traces emitted from beachshirts application to Wavefront.
 
 ## Use Wavefront Tracer
 
