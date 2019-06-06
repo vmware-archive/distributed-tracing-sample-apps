@@ -4,29 +4,14 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
 
 ## Running the Application Locally
 
-1. Run Jaeger in your env using the [Docker image](https://www.jaegertracing.io/docs/getting-started):
+1. `git clone` this repo and navigate to this dir:
 
-   ```bash
-   $ docker run -d --name jaeger \
-     -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
-     -p 5775:5775/udp \
-     -p 6831:6831/udp \
-     -p 6832:6832/udp \
-     -p 5778:5778 \
-     -p 16686:16686 \
-     -p 14268:14268 \
-     -p 9411:9411 \
-     jaegertracing/all-in-one:1.8
-   ```
-
-2. `git clone` this repo and navigate to this dir:
-
-3. ```bash
+2. ```bash
    git clone https://github.com/wavefrontHQ/hackathon.git
-   cd hackathon/distributed-tracing/aspnetcore-app
+   cd hackathon/Wavefront-DT/aspnetcore-app
    ```
 
-4. Now run all the services from the root directory of the project using the commands below:
+3. Now run all the services using the commands below:
 
    ```bash
    dotnet run --project src/BeachShirts.Shopping/BeachShirts.Shopping.csproj
@@ -34,19 +19,47 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
    dotnet run --project src/BeachShirts.Delivery/BeachShirts.Delivery.csproj
    ```
 
-5. Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
+4. Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
 
-6. Now go to Jaeger UI (http://localhost:16686, if you're using all-in-one docker image as given above) and look for the traces for service "Shopping" and click on Find Traces.
+5. This app is instrumented with a NoopTracer. Next step is to switch from NoopTracer to WavefrontTracer to see the traces emitted from beachshirts application to Wavefront.
 
-## Change from Jaeger to Wavefront
+## Use Wavefront Tracer
 
-1. Add [Wavefront.OpenTracing.SDK.CSharp](https://www.nuget.org/packages/Wavefront.OpenTracing.SDK.CSharp/) as a dependency to the BeachShirts.Common project.
+1. Add the following dependency [Wavefront.OpenTracing.SDK.CSharp](https://www.nuget.org/packages/Wavefront.OpenTracing.SDK.CSharp/) to the `BeachShirts.Common` project.
 
    ```bash
    dotnet add src/BeachShirts.Common/BeachShirts.Common.csproj package Wavefront.OpenTracing.SDK.CSharp
    ```
 
-2. Make sure you have the Wavefront proxy (version >= v4.34) installed.
+2. You can send data to Wavefront either using one of the 2 options below -
+
+**Option A** - via Direct Ingestion
+
+**Option B** - via Wavefront Proxy
+
+**Option A** - If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
+
+Now go to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs` and change the `ITracer Init(string service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-csharp#set-up-a-tracer) as follows:
+
+   ```csharp
+   public static ITracer Init(string service)
+   {
+       var wfDirectIngestionClientBuilder = new WavefrontDirectIngestionClient.Builder(
+           "https://{cluster}.wavefront.com", <wf_API_token>);
+       var wavefrontSender = wfDirectIngestionClientBuilder.Build();
+       /*
+        * TODO: You need to assign your microservices application a name.
+        * For this hackathon, please prepend your name (example: "John") to the BeachShirts application,
+        * for example: applicationName = "John-BeachShirts"
+        */
+       var applicationTags = new ApplicationTags.Builder(applicationName, service).Build();
+       var wfSpanReporter = new WavefrontSpanReporter.Builder().Build(wavefrontSender);
+       var wfTracerBuilder = new WavefrontTracer.Builder(wfSpanReporter, applicationTags);
+       return wfTracerBuilder.Build();
+   }
+   ```
+
+**Option B** - If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.36:
 
    * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
@@ -56,7 +69,7 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
 
    * You can use following command to run Wavefront proxy in docker:
 
-   * ```bash
+     ```bash
       docker run -d \
           -e WAVEFRONT_URL=https://{CLUSTER}.wavefront.com/api/ \
           -e WAVEFRONT_TOKEN={TOKEN} \
@@ -67,39 +80,36 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
           -p 30000:30000 \
           -p 40000:40000 \
           wavefronthq/proxy:latest
-      ```
+     ```
 
-3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
+ Now go to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs` and change the `ITracer Init(string service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-csharp#set-up-a-tracer) as follows:
 
-4. Go to `src/BeachShirts.Common/Tracing.cs` and change the `ITracer Init(string service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-csharp#set-up-a-tracer) instead of a Jaeger Tracer as follows:
+    ```csharp
+    public static ITracer Init(string service)
+    {
+        var wfProxyClientBuilder = new WavefrontProxyClient.Builder("localhost")
+            .MetricsPort(2878).TracingPort(30000).DistributionPort(40000);
+        var wavefrontSender = wfProxyClientBuilder.Build();
+        /*
+         * TODO: You need to assign your microservices application a name.
+         * For this hackathon, please prepend your name (example: "John") to the BeachShirts application,
+         * for example: applicationName = "John-BeachShirts"
+         */
+        var applicationTags = new ApplicationTags.Builder(applicationName, service).Build();
+        var wfSpanReporter = new WavefrontSpanReporter.Builder().Build(wavefrontSender);
+        var wfTracerBuilder = new WavefrontTracer.Builder(wfSpanReporter, applicationTags);
+        return wfTracerBuilder.Build();
+    }
+    ```
 
-   ```csharp
-   public static ITracer Init(string service)
-   {
-       var wfProxyClientBuilder = new WavefrontProxyClient.Builder("localhost")
-           .MetricsPort(2878).TracingPort(30000).DistributionPort(40000);
-       var wavefrontSender = wfProxyClientBuilder.Build();
-       /*
-        * TODO: You need to assign your microservices application a name.
-        * For this hackathon, please prepend your name (example: "John") to the BeachShirts application,
-        * for example: applicationName = "John-BeachShirts"
-        */
-       var applicationTags = new ApplicationTags.Builder(applicationName, service).Build();
-       var wfSpanReporter = new WavefrontSpanReporter.Builder().
-           WithSource("wavefront-tracing-example").Build(wavefrontSender);
-       var wfTracerBuilder = new WavefrontTracer.Builder(wfSpanReporter, applicationTags);
-       return wfTracerBuilder.Build();
-   }
-   ```
+3. Now restart all the services again using below commands from root directory of the project.
 
-5. Now restart all the services again using below commands from root directory of the project.
+```bash
+dotnet run --project src/BeachShirts.Shopping/BeachShirts.Shopping.csproj
+dotnet run --project src/BeachShirts.Styling/BeachShirts.Styling.csproj
+dotnet run --project src/BeachShirts.Delivery/BeachShirts.Delivery.csproj
+```
 
-   ```bash
-   dotnet run --project src/BeachShirts.Shopping/BeachShirts.Shopping.csproj
-   dotnet run --project src/BeachShirts.Styling/BeachShirts.Styling.csproj
-   dotnet run --project src/BeachShirts.Delivery/BeachShirts.Delivery.csproj
-   ```
-   
-6. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+4. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-7. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
+5. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenTracing;
+using OpenTracing.Tag;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -58,24 +59,28 @@ namespace BeachShirts.Styling.Controllers
                 {
                     string msg = "Failed to make shirts!";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return StatusCode(503, msg);
                 }
                 if (id == null)
                 {
                     string msg = "style id is null";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return BadRequest(msg);
                 }
                 if (!shirtStyles.ContainsKey(id))
                 {
                     string msg = "style id not found: " + id;
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return BadRequest(msg);
                 }
                 if (quantity <= 0)
                 {
                     string msg = "quantity is not a positive number: " + quantity;
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return BadRequest(msg);
                 }
 
@@ -104,6 +109,7 @@ namespace BeachShirts.Styling.Controllers
                 {
                     string msg = "Failed to make shirts!";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return StatusCode(((StatusCodeResult)deliveryResponse.Result).StatusCode, msg);
                 }
             }

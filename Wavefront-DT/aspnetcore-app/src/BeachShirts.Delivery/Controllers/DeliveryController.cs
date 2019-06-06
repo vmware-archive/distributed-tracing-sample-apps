@@ -5,6 +5,7 @@ using BeachShirts.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OpenTracing;
+using OpenTracing.Tag;
 
 namespace BeachShirts.Delivery.Controllers
 {
@@ -35,6 +36,7 @@ namespace BeachShirts.Delivery.Controllers
                 {
                     string msg = "Failed to dispatch shirts!";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return StatusCode(503, msg);
                 }
                 if (random.Next(0, 10) == 0)
@@ -45,12 +47,14 @@ namespace BeachShirts.Delivery.Controllers
                 {
                     string msg = "Invalid Order Num";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return BadRequest(msg);
                 }
                 if (packedShirts == null || packedShirts.Shirts == null || packedShirts.Shirts.Count == 0)
                 {
                     string msg = "No shirts to deliver";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return BadRequest(msg);
                 }
                 string trackingNum = Guid.NewGuid().ToString();
@@ -70,6 +74,7 @@ namespace BeachShirts.Delivery.Controllers
                 {
                     string msg = "Invalid Order Num";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return BadRequest(msg);
                 }
                 return Ok($"Order {orderNum} returned");

@@ -7,6 +7,7 @@ using System;
 using Microsoft.Extensions.Logging;
 using OpenTracing;
 using System.Net.Http;
+using OpenTracing.Tag;
 
 namespace BeachShirts.Shopping.Controllers
 {
@@ -57,6 +58,7 @@ namespace BeachShirts.Shopping.Controllers
                 {
                     string msg = "Failed to order shirts!";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return StatusCode(503, msg);
                 }
 
@@ -64,12 +66,14 @@ namespace BeachShirts.Shopping.Controllers
                 {
                     string msg = "StyleName is null";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return BadRequest(msg);
                 }
                 if (order.Quantity <= 0)
                 {
                     string msg = "Quantity is not a positive number: " + order.Quantity;
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return BadRequest(msg);
                 }
 
@@ -89,6 +93,7 @@ namespace BeachShirts.Shopping.Controllers
                 {
                     string msg = "Failed to order shirts!";
                     logger.LogWarning(msg);
+                    scope.Span.SetTag(Tags.Error, true);
                     return StatusCode(((StatusCodeResult)deliveryResponse.Result).StatusCode, msg);
                 }
             }
