@@ -41,11 +41,11 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
    </dependencies>
    ```
 
-2. You can send data to Wavefront either using one of the 2 options below -
+2. You can send data to Wavefront either using one of the 2 options below:
 
-**Option A** - via Direct Ingestion
+   * **Option A** - via Direct Ingestion
 
-**Option B** - via Wavefront Proxy
+   * **Option B** - via Wavefront Proxy
 
 **Option A** - If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
@@ -123,15 +123,25 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
 
    After making all the code changes, run `mvn clean install` from the root directory of the project.
 
+3. Make sure you add the following imports to `dropwizard-app/common/../Tracing.java`:
 
+   ```java
+   import com.wavefront.opentracing.WavefrontTracer;
+   import com.wavefront.opentracing.reporting.Reporter;
+   import com.wavefront.opentracing.reporting.WavefrontSpanReporter;
+   import com.wavefront.sdk.common.WavefrontSender;
+   import com.wavefront.sdk.common.application.ApplicationTags;
+   import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
+   import com.wavefront.sdk.proxy.WavefrontProxyClient;
+   ```
 
-3. Now restart all the services again using below commands from root directory of the project.
+4. Now restart all the services again using below commands from root directory of the project.
 
    ```bash
    java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar server ./shopping/app.yaml
    java -jar ./styling/target/styling-1.0-SNAPSHOT.jar server ./styling/app.yaml
    java -jar ./delivery/target/delivery-1.0-SNAPSHOT.jar server ./delivery/app.yaml
    ```
-4. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+5. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-5. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
+6. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
