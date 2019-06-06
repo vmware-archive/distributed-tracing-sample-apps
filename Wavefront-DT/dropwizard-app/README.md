@@ -44,6 +44,7 @@ Step 1 - Add the following dependency [`Wavefront Opentracing SDK`](https://gith
 Step 2 - You can send data to Wavefront either using one of the 2 options below -
 
 Option A - via Direct Ingestion
+
 Option B - via Wavefront Proxy
 
 Option A - If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
