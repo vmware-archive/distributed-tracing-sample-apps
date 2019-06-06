@@ -27,7 +27,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 
 ## Use Wavefront Tracer
 
-Step 1 - Add the following dependency [`Wavefront Opentracing SDK`](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java) to the `pom.xml`:
+1. Add the following dependency [`Wavefront Opentracing SDK`](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java) to the `pom.xml`:
 
    ```xml
    <dependencies>
@@ -41,13 +41,13 @@ Step 1 - Add the following dependency [`Wavefront Opentracing SDK`](https://gith
    </dependencies>
    ```
 
-Step 2 - You can send data to Wavefront either using one of the 2 options below -
+2. You can send data to Wavefront either using one of the 2 options below -
 
-Option A - via Direct Ingestion
+**Option A** - via Direct Ingestion
 
-Option B - via Wavefront Proxy
+**Option B** - via Wavefront Proxy
 
-Option A - If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
+**Option A** - If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
 Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) as follows:
 
@@ -76,7 +76,7 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
 
    After making all the code changes, run `mvn clean install` from the root directory of the project.
 
-Option B - If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.36:
+**Option B** - If you are sending tracing spans to Wavefront via Proxy, then make sure you are using proxy version >= v4.36:
 
    * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
@@ -125,13 +125,13 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
 
 
 
-Step 3 - Now restart all the services again using below commands from root directory of the project.
+3. Now restart all the services again using below commands from root directory of the project.
 
    ```bash
    java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar server ./shopping/app.yaml
    java -jar ./styling/target/styling-1.0-SNAPSHOT.jar server ./styling/app.yaml
    java -jar ./delivery/target/delivery-1.0-SNAPSHOT.jar server ./delivery/app.yaml
    ```
-Step 4 - Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+4. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-Step 5 - Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
+5. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
