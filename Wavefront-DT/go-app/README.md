@@ -86,13 +86,13 @@ This is a sample Go application using `chi` router framework called beachshirts 
 
   ### B. Wavefront Proxy
 
-    * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
+  * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
-    * Enable `traceListenerPorts` on the Wavefront proxy configuration: See [here](https://docs.wavefront.com/proxies_configuring.html#proxy-configuration-properties) for details.
+  * Enable `traceListenerPorts` on the Wavefront proxy configuration: See [here](https://docs.wavefront.com/proxies_configuring.html#proxy-configuration-properties) for details.
 
         **Note**: You need to use the same tracing port (for example: `30000`) when you instantiate the `WavefrontProxyClient` (see below).
 
-    * You can use following command to run Wavefront proxy in docker:
+  * You can use following command to run Wavefront proxy in docker:
 
         ```bash
         docker run -d \
@@ -107,7 +107,7 @@ This is a sample Go application using `chi` router framework called beachshirts 
             wavefronthq/proxy:latest
         ```
 
-    * Add the following imports and code changes (replace function `NewGlobalTracer()`) in `tracing.go`
+  * Add the following imports and code changes (replace function `NewGlobalTracer()`) in `tracing.go`
 
         ```go
         import (
@@ -141,8 +141,6 @@ This is a sample Go application using `chi` router framework called beachshirts 
             return ioutil.NopCloser(nil)
         }
         ```
-
-
 
 2. Rebuild the binary:
     ```bash
