@@ -4,41 +4,26 @@ This is a sample Go application using `chi` router framework called beachshirts 
 
 ## Running the Application Locally
 
-1. Run Jaeger in your env using the [Docker image](https://www.jaegertracing.io/docs/getting-started):
-
-   ```bash
-   $ docker run -d --name jaeger \
-     -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
-     -p 5775:5775/udp \
-     -p 6831:6831/udp \
-     -p 6832:6832/udp \
-     -p 5778:5778 \
-     -p 16686:16686 \
-     -p 14268:14268 \
-     -p 9411:9411 \
-     jaegertracing/all-in-one:1.9
-   ```
-
-2. `git clone` this repo and navigate to this dir:
+1. `git clone` this repo and navigate to this dir:
     ```bash
     git clone https://github.com/wavefrontHQ/hackathon.git
-    cd hackathon/distributed-tracing/go-app/
+    cd hackathon/Wavefront-DT/go-app/
     ```
 
-3. Build the binary for services:
+2. Build the binary for services:
     ```bash
     go build -o target/beachshirts  cmd/beachshirts/main.go
     ```
     **Note**: Requires Go 1.11 and above.
 
-4. Run all the services using the commands below:
+3. Run all the services using the commands below:
     ```bash
     ./target/beachshirts conf/shopping.conf
     ./target/beachshirts conf/styling.conf
     ./target/beachshirts conf/delivery.conf
     ```
 
-5. Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
+4. Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds. You will see some random failures which are added by us.
 
     - You can view the shopping menu with a HTTP GET request: `http://localhost:50050/shop/menu`
     - You can also Order Shirts using a HTTP POST:
@@ -47,15 +32,59 @@ This is a sample Go application using `chi` router framework called beachshirts 
         Payload: {"styleName" : "testStyle1","quantity" : 5}
         ```
 
-6. Now go to Jaeger UI (http://localhost:16686, if you're using all-in-one docker image as given above) and look for the traces for service "shopping" and click on Find Traces.
+5. This app is instrumented with a NoopTracer. Next step is to switch from NoopTracer to WavefrontTracer to see the traces emitted from beachshirts application to Wavefront.
 
 <br/>
 
-## Change from Jaeger to Wavefront
+## Use Wavefront Tracer
 
-1. Choose a way to connect to Wavefront
+1. You can send data to Wavefront using either:
+  * **A.** Direct Ingestion
+  * **B.** Wavefront Proxy
 
-    ### a. Via Wavefront Proxy
+  ### A. Direct Ingestion
+
+  * Make sure you have the cluster name and API token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
+
+  * Add the following imports and code changes (replace function `NewGlobalTracer()`) in `tracing.go`
+
+      ```go
+      import (
+          wfreporter "github.com/wavefronthq/wavefront-opentracing-sdk-go/reporter"
+          wftracer "github.com/wavefronthq/wavefront-opentracing-sdk-go/tracer"
+          application "github.com/wavefronthq/wavefront-sdk-go/application"
+          wavefront "github.com/wavefronthq/wavefront-sdk-go/senders"
+      )
+
+      func NewGlobalTracer(serviceName string) io.Closer {
+
+          config := &wavefront.DirectConfiguration{
+              Server: "https://{CLUSTER}.wavefront.com",
+              Token:  "{TOKEN}",
+          }
+          sender, err := wavefront.NewDirectSender(config)
+          if err != nil {
+              log.Printf("Couldn't create Wavefront Sender: %s\n", err.Error())
+              os.Exit(1)
+          }
+
+          appTags := application.New("beachshirts", serviceName)
+
+          directrep := wfreporter.New(sender, appTags)
+          consolerep := wfreporter.NewConsoleSpanReporter(serviceName)
+
+          reporter := wfreporter.NewCompositeSpanReporter(directrep, consolerep)
+
+          tracer := wftracer.New(reporter)
+
+          opentracing.SetGlobalTracer(tracer)
+
+          return ioutil.NopCloser(nil)
+
+      }
+      ```
+
+  ### B. Wavefront Proxy
 
     * See [here](https://docs.wavefront.com/proxies_installing.html#proxy-installation) for details on installing the Wavefront proxy.
 
@@ -89,7 +118,6 @@ This is a sample Go application using `chi` router framework called beachshirts 
         )
 
         func NewGlobalTracer(serviceName string) io.Closer {
-
             config := &wavefront.ProxyConfiguration{
                 Host:        "<PROXY_IP/PROXY_FQDN>",
                 TracingPort: <PROXY_TRACING_PORT>,
@@ -108,55 +136,13 @@ This is a sample Go application using `chi` router framework called beachshirts 
             reporter := wfreporter.NewCompositeSpanReporter(directrep, consolerep)
 
             tracer := wftracer.New(reporter)
-
             opentracing.SetGlobalTracer(tracer)
 
             return ioutil.NopCloser(nil)
-
         }
         ```
 
 
-    ### b. Via Direct Ingestion
-    * Make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
-
-    * Add the following imports and code changes (replace function `NewGlobalTracer()`) in `tracing.go`
-
-        ```go
-        import (
-            wfreporter "github.com/wavefronthq/wavefront-opentracing-sdk-go/reporter"
-            wftracer "github.com/wavefronthq/wavefront-opentracing-sdk-go/tracer"
-            application "github.com/wavefronthq/wavefront-sdk-go/application"
-            wavefront "github.com/wavefronthq/wavefront-sdk-go/senders"
-        )
-
-        func NewGlobalTracer(serviceName string) io.Closer {
-
-            config := &wavefront.DirectConfiguration{
-                Server: "https://{CLUSTER}.wavefront.com",
-                Token:  "{TOKEN}",
-            }
-            sender, err := wavefront.NewDirectSender(config)
-            if err != nil {
-                log.Printf("Couldn't create Wavefront Sender: %s\n", err.Error())
-                os.Exit(1)
-            }
-
-            appTags := application.New("beachshirts", serviceName)
-
-            directrep := wfreporter.New(sender, appTags)
-            consolerep := wfreporter.NewConsoleSpanReporter(serviceName)
-
-            reporter := wfreporter.NewCompositeSpanReporter(directrep, consolerep)
-
-            tracer := wftracer.New(reporter)
-
-            opentracing.SetGlobalTracer(tracer)
-
-            return ioutil.NopCloser(nil)
-
-        }
-        ```
 
 2. Rebuild the binary:
     ```bash
