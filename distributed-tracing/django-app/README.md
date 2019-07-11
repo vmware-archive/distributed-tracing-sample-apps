@@ -83,14 +83,23 @@ This is a sample Python application using Django Framework called beachshirts (#
                                       cluster="<CLUSTER_NAME>",
                                       shard="<SHARD_NAME>")
 
+   # Send via Wavefront Proxy
    proxy_client = WavefrontProxyClient(
        host="<PROXY_HOST>",
        tracing_port=30000,
        distribution_port=40000,
        metrics_port=2878
    )
-
    proxy_reporter = WavefrontSpanReporter(client=proxy_client)
+
+   
+   # Send via Direct Ingestion
+   direct_client = WavefrontDirectClient(
+       server="<SERVER_ADDR>",
+       token="<TOKEN>"
+   )
+   direct_reporter = WavefrontSpanReporter(client=direct_client)
+
 
    TRACER = WavefrontTracer(reporter=proxy_reporter, application_tags=application_tags)
    ```
