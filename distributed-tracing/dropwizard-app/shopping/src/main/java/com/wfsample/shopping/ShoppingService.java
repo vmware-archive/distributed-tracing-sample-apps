@@ -71,7 +71,8 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     @Path("/menu")
     public Response getShoppingMenu(@Context HttpHeaders httpHeaders) {
       try (Scope scope = tracer.buildSpan("getShoppingMenu").
-          withTag("env", "staging").withTag("location", "palo-alto").startActive(true)) {
+          withTag("env", "staging").withTag("location", "palo-alto").withTag("tenant", "wavefront").
+          startActive(true)) {
         return Response.ok(stylingApi.getAllStyles(httpHeaders)).build();
       }
     }
@@ -81,7 +82,7 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     @Consumes(APPLICATION_JSON)
     public Response orderShirts(OrderDTO orderDTO, @Context HttpHeaders httpHeaders) {
       try (Scope scope = tracer.buildSpan("orderShirts").withTag("env", "staging").
-          withTag("location", "palo-alto").startActive(true)) {
+          withTag("tenant", "wavefront").withTag("location", "palo-alto").startActive(true)) {
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
           scope.span().setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
