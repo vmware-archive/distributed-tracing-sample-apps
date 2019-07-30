@@ -55,7 +55,9 @@ public final class Tracing {
     } catch (IllegalArgumentException e) {
       spanBuilder = tracer.buildSpan(operationName);
     }
-    return spanBuilder.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER).startActive(true);
+    return spanBuilder.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER).
+        withTag("env", "staging").withTag("location", "palo-alto").withTag("tenant", "wavefront").
+        startActive(true);
   }
 
   public static TextMap requestBuilderCarrier(final Request.Builder builder) {
