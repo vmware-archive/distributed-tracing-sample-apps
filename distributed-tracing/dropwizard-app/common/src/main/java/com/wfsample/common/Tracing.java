@@ -23,10 +23,10 @@ import java.util.Random;
 
 public final class Tracing {
   private final static Random RAND = new Random(System.currentTimeMillis());
-  private final static String[] ENV_TAGS = new String[]{"staging", "production", "development"};
-  private final static String[] LOCATION_TAGS = new String[]{"palo-alto", "san-francisco",
+  private final static String[] ENV_TAGS = new String[] {"staging", "production", "development"};
+  private final static String[] LOCATION_TAGS = new String[] {"palo-alto", "san-francisco",
       "new-york"};
-  private final static String[] TENANT_TAGS = new String[]{"wavefront", "vmware"};
+  private final static String[] TENANT_TAGS = new String[] {"wavefront", "vmware"};
 
   private Tracing() {
   }
