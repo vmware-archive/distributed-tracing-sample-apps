@@ -4,6 +4,7 @@ import com.uber.jaeger.Configuration;
 import com.uber.jaeger.Configuration.ReporterConfiguration;
 import com.uber.jaeger.Configuration.SamplerConfiguration;
 import com.uber.jaeger.samplers.ConstSampler;
+
 import io.opentracing.Scope;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
@@ -14,11 +15,19 @@ import io.opentracing.tag.Tags;
 import okhttp3.Request;
 
 import javax.ws.rs.core.MultivaluedMap;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 public final class Tracing {
+  private final static Random RAND = new Random(System.currentTimeMillis());
+  private final static String[] ENV_TAGS = new String[]{"staging", "production", "development"};
+  private final static String[] LOCATION_TAGS = new String[]{"palo-alto", "san-francisco",
+      "new-york"};
+  private final static String[] TENANT_TAGS = new String[]{"wavefront", "vmware"};
+
   private Tracing() {
   }
 
@@ -55,9 +64,14 @@ public final class Tracing {
     } catch (IllegalArgumentException e) {
       spanBuilder = tracer.buildSpan(operationName);
     }
-    return spanBuilder.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER).
-        withTag("env", "staging").withTag("location", "palo-alto").withTag("tenant", "wavefront").
+    return appendCustomTags(spanBuilder.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)).
         startActive(true);
+  }
+
+  public static Tracer.SpanBuilder appendCustomTags(Tracer.SpanBuilder spanBuilder) {
+    return spanBuilder.withTag("env", ENV_TAGS[RAND.nextInt(ENV_TAGS.length)]).
+        withTag("location", LOCATION_TAGS[RAND.nextInt(LOCATION_TAGS.length)]).
+        withTag("tenant", TENANT_TAGS[RAND.nextInt(TENANT_TAGS.length)]);
   }
 
   public static TextMap requestBuilderCarrier(final Request.Builder builder) {
