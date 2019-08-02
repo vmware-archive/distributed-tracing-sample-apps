@@ -8,7 +8,7 @@ module.exports.initTracer = (serviceName) => {
       param: 1,
     },
     reporter: {
-       agentHost: "10.192.213.225",
+       agentHost: "localhost",
        agentPort: 6832,
     },
   };
