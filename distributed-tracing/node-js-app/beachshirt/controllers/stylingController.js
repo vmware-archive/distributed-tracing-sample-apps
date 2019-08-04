@@ -12,7 +12,7 @@ module.exports = (app, config, log, tracer) => {
         const parentSpanContext = tracer.extract(FORMAT_HTTP_HEADERS, req.headers)
         const span = tracer.startSpan('/style', {
             childOf: parentSpanContext,
-            tags: {[Tags.SPAN_KIND]: Tags.SPAN_KIND_RPC_SERVER}
+            tags: {...{[Tags.SPAN_KIND]: Tags.SPAN_KIND_RPC_SERVER}, ...utils.getCustomTags()}
         });
         setTimeout(() => {
             span.setTag(Tags.HTTP_STATUS_CODE, 200)
@@ -35,9 +35,9 @@ module.exports = (app, config, log, tracer) => {
         const parentSpanContext = tracer.extract(FORMAT_HTTP_HEADERS, req.headers);
         const span = tracer.startSpan('/style/make', {
             childOf: parentSpanContext,
-            tags: {[Tags.SPAN_KIND]: Tags.SPAN_KIND_RPC_SERVER}
+            tags: {...{[Tags.SPAN_KIND]: Tags.SPAN_KIND_RPC_SERVER}, ...utils.getCustomTags()}
         });
-        if (Math.floor(Math.random() * 10) === 0) {
+        if (utils.getRandomInt(10) === 0) {
             const error = "Failed to make shirts!";
             log.error(error);
             span.setTag(Tags.HTTP_STATUS_CODE, 503);
