@@ -2,6 +2,10 @@ const log4js = require('log4js')
 const request = require('request');
 const { Tags, FORMAT_HTTP_HEADERS } = require('opentracing');
 
+const _envTags = ['staging', 'production', 'development'];
+const _locationTags = ['palo-alto', 'san-francisco', 'new-york'];
+const _tenantTags = ['wavefront', 'vmware'];
+
 // prepares the base url
 exports.getBaseUrl = (service) => {
     return `http://${service.host}:${service.port}`;
@@ -82,4 +86,18 @@ exports.postRequest = (res, api, formData, service, span, tracer) => {
     span.finish();
     return res.status(response.statusCode).json(JSON.parse(body));
  })
+}
+
+// returns a set of custom span tags
+exports.getCustomTags = () => {
+    return {
+        'env': _envTags[this.getRandomInt(_envTags.length)],
+        'location': _locationTags[this.getRandomInt(_locationTags.length)],
+        'tenant': _tenantTags[this.getRandomInt(_tenantTags.length)]
+    };
+}
+
+// returns a random integer in the range [0, max)
+exports.getRandomInt = (max) => {
+    return Math.floor(Math.random() * Math.floor(max));
 }

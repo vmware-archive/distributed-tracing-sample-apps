@@ -3,6 +3,7 @@
 * @author Yogesh Prasad Kurmi (ykurmi@vmware.com)
 */
 const uuid4 = require('uuid4');
+const utils = require('../utils');
 const { Tags, FORMAT_HTTP_HEADERS } = require('opentracing');
 
 module.exports = (app, log, tracer) => {
@@ -11,11 +12,11 @@ module.exports = (app, log, tracer) => {
         const parentSpanContext = tracer.extract(FORMAT_HTTP_HEADERS, req.headers)
         const span = tracer.startSpan('/dispatch', {
             childOf: parentSpanContext,
-            tags: {[Tags.SPAN_KIND]: Tags.SPAN_KIND_RPC_SERVER}
+            tags: {...{[Tags.SPAN_KIND]: Tags.SPAN_KIND_RPC_SERVER}, ...utils.getCustomTags()}
         });
         const orderNum = req.params.orderNum;
         let shirts = JSON.parse(req.body.shirts);
-        if (Math.floor(Math.random() * 5) === 0) {
+        if (utils.getRandomInt(5) === 0) {
             const error = "Failed to dispatch shirts!";
             log.error(error);
             span.setTag(Tags.HTTP_STATUS_CODE, 503)
@@ -24,7 +25,7 @@ module.exports = (app, log, tracer) => {
             return res.status(503).json({error});
         }
 
-        if (Math.floor(Math.random() * 10) === 0) {
+        if (utils.getRandomInt(10) === 0) {
             const error = "Invalid Order Num";
             log.error(error);
             span.setTag(Tags.HTTP_STATUS_CODE, 400)
@@ -33,7 +34,7 @@ module.exports = (app, log, tracer) => {
             return res.status(400).json({error});
         }
 
-        if (Math.floor(Math.random() * 10) === 0) {
+        if (utils.getRandomInt(10) === 0) {
             shirts = null;
         }
         if (shirts === null || shirts.length === 0){
@@ -55,7 +56,7 @@ module.exports = (app, log, tracer) => {
     });
 
     app.post('/retrieve/:orderNum/', (req, res) => {
-        const span = tracer.startSpan('/retrieve');
+        const span = tracer.startSpan('/retrieve', { tags: utils.getCustomTags() });
         const orderNum = req.params.orderNum;
         if (orderNum === null){
             const error = "Invalid Order Num";
