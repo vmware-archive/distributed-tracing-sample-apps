@@ -53,13 +53,13 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
 
 In the import section of the code (at line 13), add the following imports.
    ```java
-      import com.wavefront.opentracing.WavefrontTracer;
-      import com.wavefront.opentracing.reporting.Reporter;
-      import com.wavefront.opentracing.reporting.WavefrontSpanReporter;
-      import com.wavefront.sdk.common.WavefrontSender;
-      import com.wavefront.sdk.common.application.ApplicationTags;
-      import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
-      import com.wavefront.sdk.proxy.WavefrontProxyClient;
+   import com.wavefront.opentracing.WavefrontTracer;
+   import com.wavefront.opentracing.reporting.Reporter;
+   import com.wavefront.opentracing.reporting.WavefrontSpanReporter;
+   import com.wavefront.sdk.common.WavefrontSender;
+   import com.wavefront.sdk.common.application.ApplicationTags;
+   import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
+   import com.wavefront.sdk.proxy.WavefrontProxyClient;
    ```
 
 Modify the init() method with the following snippet:
@@ -116,13 +116,13 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
 
 In the import section of the code (line 13), add the following imports.
    ```java
-      import com.wavefront.opentracing.WavefrontTracer;
-      import com.wavefront.opentracing.reporting.Reporter;
-      import com.wavefront.opentracing.reporting.WavefrontSpanReporter;
-      import com.wavefront.sdk.common.WavefrontSender;
-      import com.wavefront.sdk.common.application.ApplicationTags;
-      import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
-      import com.wavefront.sdk.proxy.WavefrontProxyClient;
+   import com.wavefront.opentracing.WavefrontTracer;
+   import com.wavefront.opentracing.reporting.Reporter;
+   import com.wavefront.opentracing.reporting.WavefrontSpanReporter;
+   import com.wavefront.sdk.common.WavefrontSender;
+   import com.wavefront.sdk.common.application.ApplicationTags;
+   import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
+   import com.wavefront.sdk.proxy.WavefrontProxyClient;
    ```
 
 Modify the init() method with the following snippet:
