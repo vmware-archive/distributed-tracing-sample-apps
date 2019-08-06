@@ -27,7 +27,9 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 
 ## Use Wavefront Tracer
 
-1. Add the following dependency [`Wavefront Opentracing SDK`](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java) to the `pom.xml`:
+1. Open dropwizard-app project in your preferred Java IDE.
+
+2. Add the following dependency [`Wavefront Opentracing SDK`](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java) to the [`pom.xml`](https://github.com/wavefrontHQ/hackathon/blob/master/Wavefront-DT/dropwizard-app/pom.xml):
 
    ```xml
    <dependencies>
@@ -35,13 +37,25 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
      <dependency>
        <groupId>com.wavefront</groupId>
        <artifactId>wavefront-opentracing-sdk-java</artifactId>
-       <version>${latest}</version>
+       <version>LATEST</version>
      </dependency>
      ...
    </dependencies>
    ```
 
-2. You can send data to Wavefront either using one of the 2 options below:
+3. Make sure you add the following imports to [`dropwizard-app/common/.../Tracing.java`](https://github.com/wavefrontHQ/hackathon/blob/master/Wavefront-DT/dropwizard-app/common/src/main/java/com/wfsample/common/Tracing.java):
+
+   ```java
+   import com.wavefront.opentracing.WavefrontTracer;
+   import com.wavefront.opentracing.reporting.Reporter;
+   import com.wavefront.opentracing.reporting.WavefrontSpanReporter;
+   import com.wavefront.sdk.common.WavefrontSender;
+   import com.wavefront.sdk.common.application.ApplicationTags;
+   import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
+   import com.wavefront.sdk.proxy.WavefrontProxyClient;
+   ```
+
+4. You can send data to Wavefront either using one of the 2 options below:
 
    * **Option A** - via Direct Ingestion
 
@@ -49,7 +63,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 
 **Option A** - If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
-Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) as follows:
+Now go to [`dropwizard-app/common/.../Tracing.java`](https://github.com/wavefrontHQ/hackathon/blob/master/Wavefront-DT/dropwizard-app/common/src/main/java/com/wfsample/common/Tracing.java) and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) as follows:
 
    ```java
    public static Tracer init(String service) {
@@ -64,6 +78,7 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
      * For this hackathon, please prepend your name (example: "john") to the beachshirts application,
      * for example: applicationName = "john-beachshirts"
      */
+    // String applicationName = "<yourName>-beachshirts";
     ApplicationTags applicationTags = new ApplicationTags.Builder(applicationName,
             service).build();
     Reporter wfSpanReporter = new WavefrontSpanReporter.Builder().
@@ -99,7 +114,7 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
           wavefronthq/proxy:latest
      ```
      
-Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) as follows:
+Now go to [`dropwizard-app/common/.../Tracing.java`](https://github.com/wavefrontHQ/hackathon/blob/master/Wavefront-DT/dropwizard-app/common/src/main/java/com/wfsample/common/Tracing.java) and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) as follows:
 
    ```java
    public static Tracer init(String service) {
@@ -111,6 +126,7 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
         * For this hackathon, please prepend your name (example: "john") to the beachshirts application,
         * for example: applicationName = "john-beachshirts"
         */
+       // String applicationName = "<yourName>-beachshirts";
        ApplicationTags applicationTags = new ApplicationTags.Builder(applicationName,
            service).build();
        Reporter wfSpanReporter = new WavefrontSpanReporter.Builder().
@@ -123,25 +139,13 @@ Now go to `dropwizard-app/common/../Tracing.java` and change the `Tracer init(St
 
    After making all the code changes, run `mvn clean install` from the root directory of the project.
 
-3. Make sure you add the following imports to `dropwizard-app/common/../Tracing.java`:
-
-   ```java
-   import com.wavefront.opentracing.WavefrontTracer;
-   import com.wavefront.opentracing.reporting.Reporter;
-   import com.wavefront.opentracing.reporting.WavefrontSpanReporter;
-   import com.wavefront.sdk.common.WavefrontSender;
-   import com.wavefront.sdk.common.application.ApplicationTags;
-   import com.wavefront.sdk.direct.ingestion.WavefrontDirectIngestionClient;
-   import com.wavefront.sdk.proxy.WavefrontProxyClient;
-   ```
-
-4. Now restart all the services again using below commands from root directory of the project.
+5. Now restart all the services again using below commands from the root directory of the project.
 
    ```bash
    java -jar ./shopping/target/shopping-1.0-SNAPSHOT.jar server ./shopping/app.yaml
    java -jar ./styling/target/styling-1.0-SNAPSHOT.jar server ./styling/app.yaml
    java -jar ./delivery/target/delivery-1.0-SNAPSHOT.jar server ./delivery/app.yaml
    ```
-5. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+6. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
 
-6. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
+7. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.

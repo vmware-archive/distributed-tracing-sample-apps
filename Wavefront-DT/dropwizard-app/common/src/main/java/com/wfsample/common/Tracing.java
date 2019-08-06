@@ -5,7 +5,7 @@ import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.noop.NoopTracerFactory;
 import io.opentracing.propagation.Format;
-import io.opentracing.propagation.TextMapExtractAdapter;
+import io.opentracing.propagation.TextMapAdapter;
 import io.opentracing.tag.Tags;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -30,7 +30,7 @@ public final class Tracing {
 
     Tracer.SpanBuilder spanBuilder;
     try {
-      SpanContext parentSpanCtx = tracer.extract(Format.Builtin.HTTP_HEADERS, new TextMapExtractAdapter(headers));
+      SpanContext parentSpanCtx = tracer.extract(Format.Builtin.HTTP_HEADERS, new TextMapAdapter(headers));
       if (parentSpanCtx == null) {
         spanBuilder = tracer.buildSpan(operationName);
       } else {
