@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using BeachShirts.Common;
 using BeachShirts.Common.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -57,10 +58,16 @@ namespace BeachShirts.Delivery.Controllers
                     scope.Span.SetTag(Tags.Error, true);
                     return BadRequest(msg);
                 }
+                Task.Run(async () => await HandleDispatchAsync());
                 string trackingNum = Guid.NewGuid().ToString();
                 logger.LogInformation($"Successfully dispatched shirts! Tracking number of Order {orderNum} is {trackingNum}");
                 return Ok(new DeliveryStatus(orderNum, trackingNum, "shirts delivery dispatched"));
             }
+        }
+
+        private async Task HandleDispatchAsync()
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1 + random.NextDouble() / 3));
         }
 
         // POST api/delivery/return/{orderNum}
