@@ -31,7 +31,7 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
    dotnet add src/BeachShirts.Common/BeachShirts.Common.csproj package Wavefront.OpenTracing.SDK.CSharp
    ```
 
-2. Open your preferred IDE and add the following imports to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs`:
+2. Open Visual Studio and add the following imports to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs`:
 
    ```csharp
    using Wavefront.OpenTracing.SDK.CSharp;
@@ -59,10 +59,11 @@ Now go to `aspnetcore-app/src/BeachShirts.Common/Tracing.cs` and change the `ITr
            "https://{cluster}.wavefront.com", "{wf_api_token}");
        var wavefrontSender = wfDirectIngestionClientBuilder.Build();
        /*
-        * TODO: You need to assign your microservices application a name.
+        * TODO: Replace {application_name} with a name for your microservices application.
         * For this hackathon, please prepend your name (example: "John") to the BeachShirts application,
         * for example: applicationName = "John-BeachShirts"
         */
+       string applicationName = "{application_name}";
        var applicationTags = new ApplicationTags.Builder(applicationName, service).Build();
        var wfSpanReporter = new WavefrontSpanReporter.Builder().Build(wavefrontSender);
        var wfTracerBuilder = new WavefrontTracer.Builder(wfSpanReporter, applicationTags);
@@ -145,7 +146,7 @@ Let's add a span for this method.
 private async Task HandleDispatchAsync(ISpanContext context)
 {
     using (var scope = tracer.BuildSpan("HandleDispatchAsync")
-            .AddReference(References.ChildOf, context)
+            .AddReference(References.FollowsFrom, context)
             .StartActive())
     {
         await Task.Delay(TimeSpan.FromSeconds(1 + random.NextDouble() / 3));
@@ -153,7 +154,7 @@ private async Task HandleDispatchAsync(ISpanContext context)
 }
 ```
 
-3. Change the method call from `Task.Run(async () => await HandleDispatchAsync());` to `Task.Run(async () => await HandleDispatchAsync(tracer.ActiveSpan.Context));`
+3. Change the method call on line 61 from `Task.Run(async () => await HandleDispatchAsync());` to `Task.Run(async () => await HandleDispatchAsync(tracer.ActiveSpan.Context));`
 
 4. Now restart all the services again using below commands from root directory of the project.
 
