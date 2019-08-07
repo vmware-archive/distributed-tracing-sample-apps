@@ -7,8 +7,8 @@ This is a sample .NET Core application called BeachShirts (#[beachops](https://m
 1. `git clone` this repo and navigate to this dir:
 
 2. ```bash
-   git clone https://github.com/wavefrontHQ/hackathon.git
-   cd hackathon/Wavefront-DT/aspnetcore-app
+   git clone --single-branch --branch han/training https://github.com/wavefrontHQ/hackathon.git hackathon-aspnetcore
+   cd hackathon-aspnetcore/Wavefront-DT/aspnetcore-app
    ```
 
 3. Now run all the services using the commands below:
