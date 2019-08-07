@@ -126,3 +126,44 @@ dotnet run --project src/BeachShirts.Delivery/BeachShirts.Delivery.csproj
 6. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans.
 
 
+# Add an Additional Span
+
+1. There is a `HandleDispatchAsync` method in `aspnetcore-app/src/BeachShirts.Delivery/Controllers/DeliveryController.cs` that has yet to be instrumented:
+
+```csharp
+private async Task HandleDispatchAsync()
+{
+    await Task.Delay(TimeSpan.FromSeconds(1 + random.NextDouble() / 3));
+}
+```
+
+Let's add a span for this method.
+
+2. Update the method to be:
+
+```csharp
+private async Task HandleDispatchAsync(ISpanContext context)
+{
+    using (var scope = tracer.BuildSpan("HandleDispatchAsync")
+            .AddReference(References.ChildOf, context)
+            .StartActive())
+    {
+        await Task.Delay(TimeSpan.FromSeconds(1 + random.NextDouble() / 3));
+    }
+}
+```
+
+3. Change the method call from `Task.Run(async () => await HandleDispatchAsync());` to `Task.Run(async () => await HandleDispatchAsync(tracer.ActiveSpan.Context));`
+
+4. Now restart all the services again using below commands from root directory of the project.
+
+```bash
+dotnet run --project src/BeachShirts.Shopping/BeachShirts.Shopping.csproj
+dotnet run --project src/BeachShirts.Styling/BeachShirts.Styling.csproj
+dotnet run --project src/BeachShirts.Delivery/BeachShirts.Delivery.csproj
+```
+
+5. Generate some load via loadgen - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds.
+
+6. Go to **Applications -> Traces** in the Wavefront UI to visualize your traces. You can also go to **Applications -> Inventory** to visualize the RED metrics that are automatically derived from your tracing spans. You should see spans and metrics for `HandleDispatchAsync` now.
+
