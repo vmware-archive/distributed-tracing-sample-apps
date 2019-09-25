@@ -40,7 +40,7 @@ This is a sample Python application using Django Framework called beachshirts (#
 
 **Option A** - If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
-Go to `settings.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Jaeger Tracer as follows:
+Go to `settings.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Noop Tracer as follows:
 
    ```python
    # Doc for Instantiating ApplicationTags:
@@ -85,7 +85,7 @@ Go to `settings.py` of each services and change the value of  `TRACER`  to [Wave
          wavefronthq/proxy:latest
      ```
 
-- Go to `settings.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Jaeger Tracer as follows:
+- Go to `settings.py` of each services and change the value of  `TRACER`  to [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-python#tracer) instead of Noop Tracer as follows:
 
    ```python
    # Doc for Instantiating ApplicationTags:
