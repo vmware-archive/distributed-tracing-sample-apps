@@ -8,7 +8,7 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
 1. Run Zipkin in your env using the [Docker image](https://zipkin.io/pages/quickstart.html):
 
    ```bash
-   $ docker run -d -p 9411:9411 openzipkin/zipkin
+   $ docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
    ```
 
 2. `git clone` this repo and navigate to this dir:
@@ -37,10 +37,8 @@ This is a sample java application using Dropwizard called beachshirts (#[beachop
 1. Kill the zipkin server.
 
    ```bash
-   // Kill the zipkin container.
-   $ docker ps -a | awk '{ print $1,$2 }' | grep openzipkin/zipkin | awk '{print $1 }' | xargs -I {} docker stop {}
-   // Verify no zipkin containers are running. The below command should not return any containers.
-   $ docker container ls | grep openzipkin/zipkin
+   $ docker stop zipkin
+   $ docker rm zipkin
    ```
 
 2. Configure the [Wavefront Zipkin Integration](https://docs.wavefront.com/zipkin.html#zipkin-integration-setup) with proxy version >= 4.35
