@@ -68,7 +68,6 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
 
     // Get the HttpTracing instance.
     final Optional<HttpTracing> tracing = configuration.getZipkinFactory().build(environment);
-
     final Client client;
     if (tracing.isPresent()) {
       client =
@@ -82,7 +81,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
               .build(clientConfig.getServiceName());
     }
     dispatchQueue = new ConcurrentLinkedDeque<>();
-    environment.jersey().register(new DeliveryWebResource(client));
+    environment.jersey().register(new DeliveryWebResource(client, tracing));
     ScheduledExecutorServiceBuilder sesBuilder =
         environment.lifecycle().scheduledExecutorService("Clear Queue");
     ScheduledExecutorService ses = sesBuilder.build();
@@ -113,8 +112,11 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
   public class DeliveryWebResource implements DeliveryApi {
 
     private final Client client;
-    DeliveryWebResource(Client client) {
+    private final Optional<HttpTracing> tracing;
+
+    DeliveryWebResource(Client client, Optional<HttpTracing> tracing) {
       this.client = Objects.requireNonNull(client);
+      this.tracing = tracing;
     }
 
     @Override
@@ -122,6 +124,9 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
       if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
         String msg = "Failed to dispatch shirts!";
         logger.warn(msg);
+        if (tracing.isPresent()) {
+          tracing.get().tracing().tracer().currentSpan().annotate(msg);
+        }
         return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
       }
       if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
@@ -133,6 +138,9 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
          */
         String msg = "Invalid Order Num";
         logger.warn(msg);
+        if (tracing.isPresent()) {
+          tracing.get().tracing().tracer().currentSpan().annotate(msg);
+        }
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
       }
       if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
@@ -145,6 +153,9 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
          */
         String msg = "No shirts to deliver";
         logger.warn(msg);
+        if (tracing.isPresent()) {
+          tracing.get().tracing().tracer().currentSpan().annotate(msg);
+        }
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
       }
       dispatchQueue.add(packedShirts);
@@ -162,6 +173,9 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
          */
         String msg = "Invalid Order Num";
         logger.warn(msg);
+        if (tracing.isPresent()) {
+          tracing.get().tracing().tracer().currentSpan().annotate(msg);
+        }
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
       }
       return Response.ok("Order: " + orderNum + " returned").build();

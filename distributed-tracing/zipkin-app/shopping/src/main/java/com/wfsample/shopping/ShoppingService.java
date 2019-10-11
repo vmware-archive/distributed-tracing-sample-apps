@@ -66,16 +66,19 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     final Optional<HttpTracing> tracing = configuration.getZipkinFactory().build(environment);
 
     environment.jersey().register(new ShoppingWebResource(
-        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, tracing.get())));
+        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, tracing.get()),
+        tracing.get()));
   }
 
   @Path("/shop")
   @Produces(MediaType.APPLICATION_JSON)
   public class ShoppingWebResource {
     private final StylingApi stylingApi;
+    private final HttpTracing httpTracing;
 
-    ShoppingWebResource(StylingApi stylingApi) {
+    ShoppingWebResource(StylingApi stylingApi, HttpTracing httpTracing) {
       this.stylingApi = stylingApi;
+      this.httpTracing = httpTracing;
     }
 
     @GET
@@ -91,6 +94,7 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
       if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
         String msg = "Failed to order shirts!";
         logger.warn(msg);
+        httpTracing.tracing().tracer().currentSpan().annotate(msg);
         return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
       }
       Response deliveryResponse = stylingApi.makeShirts(
@@ -101,6 +105,7 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
       } else {
         String msg = "Failed to order shirts!";
         logger.warn(msg);
+        httpTracing.tracing().tracer().currentSpan().annotate(msg);
         return Response.status(deliveryResponse.getStatus()).entity(msg).build();
       }
     }

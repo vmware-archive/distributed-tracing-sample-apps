@@ -65,16 +65,19 @@ public class StylingService extends Application<DropwizardServiceConfig> {
     final Optional<HttpTracing> tracing = configuration.getZipkinFactory().build(environment);
 
     environment.jersey().register(new StylingWebResource(
-        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, tracing.get())));
+        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, tracing.get()),
+        tracing.get()));
   }
 
   public class StylingWebResource implements StylingApi {
     // sample set of static styles.
     private List<ShirtStyleDTO> shirtStyleDTOS = new ArrayList<>();
     private final DeliveryApi deliveryApi;
+    private final HttpTracing httpTracing;
 
-    StylingWebResource(DeliveryApi deliveryApi) {
+    StylingWebResource(DeliveryApi deliveryApi, HttpTracing httpTracing) {
       this.deliveryApi = deliveryApi;
+      this.httpTracing = httpTracing;
       ShirtStyleDTO dto = new ShirtStyleDTO();
       dto.setName("style1");
       dto.setImageUrl("style1Image");
@@ -101,6 +104,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
       if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
         String msg = "Failed to make shirts!";
         logger.warn(msg);
+        httpTracing.tracing().tracer().currentSpan().annotate(msg);
         return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
       }
       String orderNum = UUID.randomUUID().toString();
@@ -118,6 +122,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
       } else {
         String msg = "Failed to make shirts!";
         logger.warn(msg);
+        httpTracing.tracing().tracer().currentSpan().annotate(msg);
         return Response.status(deliveryResponse.getStatus()).entity(msg).build();
       }
     }

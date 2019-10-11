@@ -21,6 +21,7 @@ module.exports = (app, log, tracer) => {
             log.error(error);
             span.setTag(Tags.HTTP_STATUS_CODE, 503)
             span.setTag(Tags.ERROR, true)
+            span.log({"event": "error", "error": error})
             span.finish();
             return res.status(503).json({error});
         }
@@ -30,6 +31,7 @@ module.exports = (app, log, tracer) => {
             log.error(error);
             span.setTag(Tags.HTTP_STATUS_CODE, 400)
             span.setTag(Tags.ERROR, true)
+            span.log({"event": "error", "error": error})
             span.finish();
             return res.status(400).json({error});
         }
@@ -42,6 +44,7 @@ module.exports = (app, log, tracer) => {
             log.info(error);
             span.setTag(Tags.HTTP_STATUS_CODE, 400)
             span.setTag(Tags.ERROR, true)
+            span.log({"event": "error", "error": error})
             span.finish();
             return res.status(400).json({error});
         }
@@ -63,6 +66,7 @@ module.exports = (app, log, tracer) => {
             log.error(error);
             span.setTag(Tags.HTTP_STATUS_CODE, 400)
             span.setTag(Tags.ERROR, true)
+            span.log({"event": "error", "error": error})
             span.finish();
             return res.status(400).json({error});
         }

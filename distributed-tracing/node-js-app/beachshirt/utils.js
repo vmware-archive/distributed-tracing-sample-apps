@@ -52,6 +52,7 @@ exports.getRequest = (res, api, param, service, span, tracer) => {
         if(error){
             span.setTag(Tags.HTTP_STATUS_CODE, 500)
             span.setTag(Tags.ERROR, true)
+            span.log({"event": "error", "error": error})
             span.finish();
             return res.status(500).json({'error': error.message})
         }
@@ -79,6 +80,7 @@ exports.postRequest = (res, api, formData, service, span, tracer) => {
     if(error){
         span.setTag(Tags.HTTP_STATUS_CODE, 500);
         span.setTag(Tags.ERROR, true);
+        span.log({"event": "error", "error": error})
         span.finish();
         return res.status(500).json({error: error.message});
     }
