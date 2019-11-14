@@ -6,10 +6,14 @@ import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 
+import io.opentracing.Span;
+import io.opentracing.log.Fields;
 import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -79,11 +83,12 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
 
     @Override
     public Response dispatch(String orderNum, PackedShirtsDTO packedShirts, HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "dispatch")) {
+      Span span = Tracing.startServerSpan(tracer, httpHeaders, "dispatch");
+      try (Scope scope = tracer.scopeManager().activate(span)) {
         if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
           String msg = "Failed to dispatch shirts!";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
         }
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
@@ -92,7 +97,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         if (orderNum.isEmpty()) {
           String msg = "Invalid Order Num";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
@@ -102,7 +107,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
             packedShirts.getShirts().size() == 0) {
           String msg = "No shirts to deliver";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         dispatchQueue.add(packedShirts);
@@ -110,19 +115,40 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         System.out.println("Tracking number of Order:" + orderNum + " is " + trackingNum);
         return Response.ok(new DeliveryStatusDTO(orderNum, trackingNum,
             "shirts delivery dispatched")).build();
+      } catch(Exception ex) {
+        Tags.ERROR.set(span, true);
+        span.log(new HashMap<String, Object>() {{
+          put(Fields.EVENT, "error");
+          put(Fields.ERROR_OBJECT, ex);
+          put(Fields.MESSAGE, ex.getMessage());
+        }});
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+      } finally {
+        span.finish();
       }
     }
 
     @Override
     public Response retrieve(String orderNum, HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "retrieve")) {
+      Span span = Tracing.startServerSpan(tracer, httpHeaders, "retrieve");
+      try (Scope scope = tracer.scopeManager().activate(span)) {
         if (orderNum.isEmpty()) {
           String msg = "Invalid Order Num";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         return Response.ok("Order: " + orderNum + " returned").build();
+      } catch(Exception ex) {
+        Tags.ERROR.set(span, true);
+        span.log(new HashMap<String, Object>() {{
+          put(Fields.EVENT, "error");
+          put(Fields.ERROR_OBJECT, ex);
+          put(Fields.MESSAGE, ex.getMessage());
+        }});
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+      } finally {
+        span.finish();
       }
     }
   }
