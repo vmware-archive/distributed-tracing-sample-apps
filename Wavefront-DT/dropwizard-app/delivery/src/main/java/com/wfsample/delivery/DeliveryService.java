@@ -2,18 +2,14 @@ package com.wfsample.delivery;
 
 import com.wfsample.common.DropwizardServiceConfig;
 import com.wfsample.common.Tracing;
-import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.DeliveryStatusDTO;
+import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.service.DeliveryApi;
 
-import io.opentracing.Span;
-import io.opentracing.log.Fields;
-import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -28,7 +24,10 @@ import io.dropwizard.Application;
 import io.dropwizard.lifecycle.setup.ScheduledExecutorServiceBuilder;
 import io.dropwizard.setup.Environment;
 import io.opentracing.Scope;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
+import io.opentracing.log.Fields;
+import io.opentracing.tag.Tags;
 
 /**
  * Driver for styling service which manages different styles of shirts and takes orders for a shirts
