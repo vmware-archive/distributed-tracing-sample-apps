@@ -7,10 +7,10 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
 
-import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.Consumes;
@@ -26,7 +26,10 @@ import javax.ws.rs.core.Response;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 import io.opentracing.Scope;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
+import io.opentracing.log.Fields;
+import io.opentracing.tag.Tags;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -70,8 +73,19 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     @GET
     @Path("/menu")
     public Response getShoppingMenu(@Context HttpHeaders httpHeaders) {
-      try (Scope scope = tracer.buildSpan("getShoppingMenu").startActive(true)) {
+      Span span = tracer.buildSpan("getShoppingMenu").start();
+      try (Scope scope = tracer.scopeManager().activate(span)) {
         return Response.ok(stylingApi.getAllStyles(httpHeaders)).build();
+      } catch(Exception ex) {
+        Tags.ERROR.set(span, true);
+        span.log(new HashMap<String, Object>() {{
+          put(Fields.EVENT, "error");
+          put(Fields.ERROR_OBJECT, ex);
+          put(Fields.MESSAGE, ex.getMessage());
+        }});
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+      } finally {
+        span.finish();
       }
     }
 
@@ -79,9 +93,10 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     @Path("/order")
     @Consumes(APPLICATION_JSON)
     public Response orderShirts(OrderDTO orderDTO, @Context HttpHeaders httpHeaders) {
-      try (Scope scope = tracer.buildSpan("orderShirts").startActive(true)) {
+      Span span = tracer.buildSpan("orderShirts").start();
+      try (Scope scope = tracer.scopeManager().activate(span)) {
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
@@ -92,11 +107,21 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
           DeliveryStatusDTO deliveryStatus = deliveryResponse.readEntity(DeliveryStatusDTO.class);
           return Response.ok().entity(deliveryStatus).build();
         } else {
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();
         }
+      } catch(Exception ex) {
+        Tags.ERROR.set(span, true);
+        span.log(new HashMap<String, Object>() {{
+          put(Fields.EVENT, "error");
+          put(Fields.ERROR_OBJECT, ex);
+          put(Fields.MESSAGE, ex.getMessage());
+        }});
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+      } finally {
+        span.finish();
       }
     }
   }

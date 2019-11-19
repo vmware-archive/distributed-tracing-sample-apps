@@ -1,6 +1,6 @@
 package com.wfsample.common;
 
-import io.opentracing.Scope;
+import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.noop.NoopTracerFactory;
@@ -20,7 +20,7 @@ public final class Tracing {
     return NoopTracerFactory.create();
   }
 
-  public static Scope startServerSpan(Tracer tracer, javax.ws.rs.core.HttpHeaders httpHeaders, String operationName) {
+  public static Span startServerSpan(Tracer tracer, javax.ws.rs.core.HttpHeaders httpHeaders, String operationName) {
     // format the headers for extraction
     MultivaluedMap<String, String> rawHeaders = httpHeaders.getRequestHeaders();
     final HashMap<String, String> headers = new HashMap<>();
@@ -39,6 +39,6 @@ public final class Tracing {
     } catch (IllegalArgumentException e) {
       spanBuilder = tracer.buildSpan(operationName);
     }
-    return spanBuilder.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER).startActive(true);
+    return spanBuilder.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER).start();
   }
 }

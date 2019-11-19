@@ -1,9 +1,5 @@
 package com.wfsample.common;
 
-import io.opentracing.Tracer;
-import io.opentracing.contrib.jaxrs2.client.ClientSpanDecorator;
-import io.opentracing.contrib.jaxrs2.client.ClientTracingFilter;
-
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -14,6 +10,10 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import java.util.Collections;
 import java.util.List;
+
+import io.opentracing.Tracer;
+import io.opentracing.contrib.jaxrs2.client.ClientSpanDecorator;
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFilter;
 
 /**
  * Utilities for use by the various beachshirts application related services.

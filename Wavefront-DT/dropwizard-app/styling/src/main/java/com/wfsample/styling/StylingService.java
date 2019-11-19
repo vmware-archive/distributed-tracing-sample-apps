@@ -3,18 +3,18 @@ package com.wfsample.styling;
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
 import com.wfsample.common.Tracing;
+import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.ShirtDTO;
 import com.wfsample.common.dto.ShirtStyleDTO;
-import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
-import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -25,7 +25,10 @@ import javax.ws.rs.core.Response;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 import io.opentracing.Scope;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
+import io.opentracing.log.Fields;
+import io.opentracing.tag.Tags;
 
 import static java.util.stream.Collectors.toList;
 
@@ -76,18 +79,22 @@ public class StylingService extends Application<DropwizardServiceConfig> {
 
     @Override
     public List<ShirtStyleDTO> getAllStyles(HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "getAllStyles")) {
+      Span span = Tracing.startServerSpan(tracer, httpHeaders, "getAllStyles");
+      try (Scope scope = tracer.scopeManager().activate(span)) {
         return shirtStyleDTOS;
+      } finally {
+        span.finish();
       }
     }
 
     @Override
     public Response makeShirts(String id, int quantity, HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "makeShirts")) {
+      Span span = Tracing.startServerSpan(tracer, httpHeaders, "makeShirts");
+      try (Scope scope = tracer.scopeManager().activate(span)) {
         if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
           String msg = "Failed to make shirts!";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
         }
         String orderNum = UUID.randomUUID().toString();
@@ -103,11 +110,21 @@ public class StylingService extends Application<DropwizardServiceConfig> {
         if (deliveryResponse.getStatus() < 400) {
           return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
         } else {
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to make shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();
         }
+      } catch(Exception ex) {
+        Tags.ERROR.set(span, true);
+        span.log(new HashMap<String, Object>() {{
+          put(Fields.EVENT, "error");
+          put(Fields.ERROR_OBJECT, ex);
+          put(Fields.MESSAGE, ex.getMessage());
+        }});
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+      } finally {
+        span.finish();
       }
     }
   }
