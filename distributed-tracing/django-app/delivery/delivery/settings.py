@@ -137,4 +137,5 @@ TRACER = jaeger_client.Config(
     service_name='delivery',
 ).initialize_tracer()
 
-OPENTRACING_TRACER = django_opentracing.DjangoTracer(TRACER)
+OPENTRACING_TRACE_ALL = False
+OPENTRACING_TRACER = django_opentracing.DjangoTracing(TRACER)
