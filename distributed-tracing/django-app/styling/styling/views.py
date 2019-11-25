@@ -1,7 +1,5 @@
-from rest_framework.response import Response
-from rest_framework.request import Request
-from rest_framework.decorators import api_view
 from django.conf import settings
+from django.http import HttpResponse, JsonResponse
 import requests
 import opentracing
 import six
@@ -26,19 +24,17 @@ all_styles = [
 
 
 @tracer.trace()
-@api_view(http_method_names=["GET"])
 def get_all_styles(request):
-    return Response(all_styles, status=200)
+    return JsonResponse(all_styles, status=200)
 
 
 @tracer.trace()
-@api_view(http_method_names=["GET"])
 def make_shirts(request, id):
     if random.randint(1, 5) == 5:
         msg = "Random Service Unavailable!"
         logging.warning(msg)
         tracer.get_span(request).set_tag("error", "true")
-        return Response(msg, status=503)
+        return HttpResponse(msg, status=503)
     quantity = int(request.GET.get('quantity', None))
     shirts = []
     for i in range(0, quantity):
@@ -48,21 +44,20 @@ def make_shirts(request, id):
                         headers=inject_as_headers(tracer, request),
                         data={'shirts': shirts})
     if res.status_code < 400:
-        return Response(res.json(), status=200)
+        return HttpResponse(res, status=200)
     else:
         msg = "Failed to make shirts!"
         logging.warning(msg)
         tracer.get_span(request).set_tag("error", "true")
-        return Response(msg, status=res.status_code)
+        return HttpResponse(msg, status=res.status_code)
 
 
 def inject_as_headers(tracer, request):
     headers = {}
-    if isinstance(request, Request):
-        request = request._request
     span = tracer.get_span(request)
     text_carrier = {}
-    tracer._tracer.inject(span.context, opentracing.Format.TEXT_MAP,
-                          text_carrier)
+    tracer.tracer.inject(span.context, opentracing.Format.TEXT_MAP,
+                         text_carrier)
     for k, v in six.iteritems(text_carrier):
         headers[k] = v
+    return headers

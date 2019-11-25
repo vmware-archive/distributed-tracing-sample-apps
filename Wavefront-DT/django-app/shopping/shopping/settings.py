@@ -119,4 +119,5 @@ STATIC_URL = '/static/'
 # TODO: Replace this with Wavefront Tracer
 TRACER = NoopTracer()
 
-OPENTRACING_TRACER = django_opentracing.DjangoTracer(TRACER)
+OPENTRACING_TRACE_ALL = False
+OPENTRACING_TRACER = django_opentracing.DjangoTracing(TRACER)
