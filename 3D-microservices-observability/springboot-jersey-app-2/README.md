@@ -36,3 +36,26 @@ which makes shirts for the beach. The application is based on spring boot web us
 
 - This application uses spring Eureka for service discovery. `registration` is the Eureka server running on port 1111. 
   Use your browser to open `http://localhost:1111` to monitor the three services `delivery`, `styling`, and `shopping`.
+  
+## Enabling Wavefront Spring Boot Starter ##
+- Uncomment the following entries in `pom.xml` in order to use Wavefront freemium to track your application performance.
+```xml
+	<dependencies>
+...
+		<!-- Wavefront spring boot starter and Sleuth
+		<dependency>
+			<groupId>com.wavefront</groupId>
+			<artifactId>wavefront-spring-boot-starter</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-sleuth</artifactId>
+			<version>2.2.2.RELEASE</version>
+		</dependency>
+		-->
+...
+   </dependencies>
+```
+- Follow the instructions in the standard output regarding the access to Wavefront freemium.
