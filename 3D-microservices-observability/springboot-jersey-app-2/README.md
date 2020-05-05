@@ -1,7 +1,9 @@
 # Wavefront Hackathon - Springboot Jersey App 2
 
 This is a sample java application using Springboot beachshirts (#[beachops](https://medium.com/@matthewzeier/thoughts-from-an-operations-wrangler-how-we-use-alerts-to-monitor-wavefront-71329c5e57a8)) 
-which makes shirts for the beach. 
+which makes shirts for the beach. The application is based on spring boot web using rest templates and rest annotations.
+- JDK 1.8 and up
+- Spring Boot 2.3.0.RC1
 
 ## Running Application locally 
 
@@ -32,3 +34,5 @@ which makes shirts for the beach.
 
 - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds
 
+- This application uses spring Eureka for service discovery. `registration` is the Eureka server running on port 1111. 
+  User your browser to go to `http://localhost:1111` to monitor the three services `delivery`, `styling`, and `shopping`.
