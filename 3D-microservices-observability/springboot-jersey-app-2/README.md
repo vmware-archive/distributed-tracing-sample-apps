@@ -35,4 +35,4 @@ which makes shirts for the beach. The application is based on spring boot web us
 - Use `./loadgen.sh {interval}` in the root directory to send a request of ordering shirts every `{interval}` seconds
 
 - This application uses spring Eureka for service discovery. `registration` is the Eureka server running on port 1111. 
-  User your browser to go to `http://localhost:1111` to monitor the three services `delivery`, `styling`, and `shopping`.
+  Use your browser to open `http://localhost:1111` to monitor the three services `delivery`, `styling`, and `shopping`.
