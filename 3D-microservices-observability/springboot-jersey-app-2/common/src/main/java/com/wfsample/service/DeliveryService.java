@@ -27,7 +27,11 @@ public class DeliveryService {
     return response;
   }
 
-  public ResponseDTO dispatch(String orderNum, PackedShirtsDTO packedShirtsDTO) {
-    return restTemplate.postForObject(serviceUrl + "/dispatch/" + orderNum, packedShirtsDTO, ResponseDTO.class);
+  public ResponseDTO dispatch(String orderNum, PackedShirtsDTO packedShirtsDTO) throws Exception {
+    ResponseDTO response = restTemplate.postForObject(serviceUrl + "/dispatch/" + orderNum, packedShirtsDTO, ResponseDTO.class);
+    if(!response.getStatus().equalsIgnoreCase("OK")) {
+      throw new Exception(response.getStatus() + ":" + response.getMessage());
+    }
+    return response;
   }
 }

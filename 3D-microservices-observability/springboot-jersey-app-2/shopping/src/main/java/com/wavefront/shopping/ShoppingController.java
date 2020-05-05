@@ -34,13 +34,13 @@ public class ShoppingController {
   }
 
   @GetMapping(path="/menu")
-  public List<ShirtStyleDTO> getMenu() {
+  public List<ShirtStyleDTO> getMenu() throws Exception {
     List<ShirtStyleDTO> styles = stylingService.getAllStyles();
     return styles;
   }
 
   @PostMapping(path="/order")
-  public ResponseDTO orderShirts(@RequestBody OrderDTO orderDTO) {
+  public ResponseDTO orderShirts(@RequestBody OrderDTO orderDTO) throws Exception {
 
     if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
       String msg = "Failed to order shirts!";

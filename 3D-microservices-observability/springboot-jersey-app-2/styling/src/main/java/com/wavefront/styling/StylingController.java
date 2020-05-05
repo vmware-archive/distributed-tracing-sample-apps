@@ -60,7 +60,7 @@ public class StylingController {
   }
 
   @PostMapping(path="/shirts")
-  public ResponseDTO makeShirts(@RequestBody OrderDTO orderDTO) {
+  public ResponseDTO makeShirts(@RequestBody OrderDTO orderDTO) throws Exception {
 
     String styleName = orderDTO.getStyleName();
     int quantity = orderDTO.getQuantity();

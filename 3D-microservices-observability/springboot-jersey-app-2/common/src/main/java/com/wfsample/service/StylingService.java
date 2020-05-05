@@ -31,16 +31,23 @@ public class StylingService {
     return response;
   }
 
-  public List<ShirtStyleDTO> getAllStyles() {
+  public List<ShirtStyleDTO> getAllStyles() throws Exception {
     List<ShirtStyleDTO> response = restTemplate.getForObject(serviceUrl + "/styles", new ArrayList<ShirtStyleDTO>().getClass());
+    if(response == null || response.size() == 0) {
+      throw new Exception("Failed to retrieve list of styles.");
+    }
     return response;
   }
 
-  public ResponseDTO makeShirts(String styleName, int quantity) {
+  public ResponseDTO makeShirts(String styleName, int quantity) throws Exception {
     String requestUrl = serviceUrl + "/shirts";
     OrderDTO order = new OrderDTO();
     order.setStyleName(styleName);
     order.setQuantity(quantity);
-    return restTemplate.postForObject(requestUrl, order, ResponseDTO.class);
+    ResponseDTO response = restTemplate.postForObject(requestUrl, order, ResponseDTO.class);
+    if(!response.getStatus().equalsIgnoreCase("OK")) {
+      throw new Exception(response.getStatus() + ":" + response.getMessage());
+    }
+    return response;
   }
 }
