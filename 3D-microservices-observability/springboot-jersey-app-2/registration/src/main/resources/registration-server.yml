@@ -23,3 +23,9 @@ spring:
     enabled: false     # Disable Thymeleaf
   datasource:
     type: org.springframework.jdbc.datasource.SimpleDriverDataSource
+
+# wavefront
+wavefront:
+  application:
+    name: Eureka
+    service: registration

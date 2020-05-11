@@ -12,3 +12,8 @@ eureka:
 # HTTP Server
 server:
   port: 4444   # HTTP (Tomcat) port
+
+# wavefront
+wavefront:
+  application:
+    name: SpringShirts
