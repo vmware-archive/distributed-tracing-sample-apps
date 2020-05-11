@@ -18,11 +18,12 @@ which makes shirts for the beach. The application is based on spring boot web us
 - Now run all the services using below commands from root directory of the project.
 
   ```bash
-  mvn -pl registration spring-boot:run
-  mvn -pl delivery spring-boot:run
-  mvn -pl styling spring-boot:run
-  mvn -pl shopping spring-boot:run
+  mvn -pl registration spring-boot:run &
+  mvn -pl delivery spring-boot:run &
+  mvn -pl styling spring-boot:run &
+  mvn -pl shopping spring-boot:run &
   ```
+- If you are using an IDE like intellij, you can also group these mvn projects together to start them up in a group.
 
 - Now view the shopping menus using HTTP GET request: `curl -X GET http://localhost:4444/menu`
 
@@ -39,23 +40,39 @@ which makes shirts for the beach. The application is based on spring boot web us
   
 ## Enabling Wavefront Spring Boot Starter ##
 - Uncomment the following entries in `pom.xml` in order to use Wavefront freemium to track your application performance.
+- Uncommenting `wavefront-spring-boot-starter` is mandatory to auto configure metrics, but you need to choose either
+  SLEUTH or Opentracing depending on your preference. For example, uncomming `<-- for SLEUTH -->` part to enable 
+  `spring-cloud-starter-sleuth` in order to have SLEUTH produce distributed tracing for the application, or you can
+  use opentracing instead.
 ```xml
 	<dependencies>
 ...
-		<!-- Wavefront spring boot starter and Sleuth
-		<dependency>
-			<groupId>com.wavefront</groupId>
-			<artifactId>wavefront-spring-boot-starter</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-sleuth</artifactId>
-			<version>2.2.2.RELEASE</version>
-		</dependency>
-		-->
+        <!-- for SLEUTH
+        	<dependency>
+        		<groupId>org.springframework.cloud</groupId>
+        		<artifactId>spring-cloud-starter-sleuth</artifactId>
+        		<version>2.2.2.RELEASE</version>
+        	</dependency>
+        -->
+        
+        <!-- for Observability using Wavefront
+        	<dependency>
+        		<groupId>com.wavefront</groupId>
+        		<artifactId>wavefront-spring-boot-starter</artifactId>
+        		<version>2.0.0-RC1</version>
+        	</dependency>
+        -->
+        
+        <!-- for Opentracing
+        	<dependency>
+          		<groupId>io.opentracing.contrib</groupId>
+          		<artifactId>opentracing-spring-cloud-starter</artifactId>
+        		<version>LATEST</version>
+        	</dependency>
+        -->
 ...
    </dependencies>
 ```
-- Follow the instructions in the standard output regarding the access to Wavefront freemium.
+- Follow the instructions in the standard output regarding the access to Wavefront freemium. Once you navigate to your Wavefront UI,
+  you should be able to see your metrics and traces shown. You may need to wait about a minute for the first flow of metrics to be shown
+  in the UI, and also make sure to run loadgen.sh with seconds interval e.g. `loadgen.sh 5` in order to produce some test loads.
