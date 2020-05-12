@@ -10,7 +10,7 @@ which makes shirts for the beach. The application is based on spring boot web us
 - `git clone` this repo and navigate to this dir:
 
 - ```bash
-  git clone https://github.com/wavefrontHQ/hackathon.git
+  git clone https://github.com/howardyoo/distributed-tracing-sample-apps/hackathon.git
   cd hackathon/3D-microservices-observability/springboot-jersey-app-2
   ```
 - Run `mvn clean install` from the root directory of the project.
