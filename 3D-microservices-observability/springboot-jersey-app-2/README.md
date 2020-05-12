@@ -13,7 +13,7 @@ which makes shirts for the beach. The application is based on spring boot web us
   git clone https://github.com/howardyoo/distributed-tracing-sample-apps/
   cd ./distributed-tracing-sample-apps/3D-microservices-observability/springboot-jersey-app-2
   ```
-- Run `mvn clean install` from the root directory of the project.
+- Run `mvn clean compile` from the root directory of the project.
 
 - Now run all the services using below commands from root directory of the project.
 
