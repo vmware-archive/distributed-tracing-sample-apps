@@ -1,4 +1,4 @@
-# Wavefront Hackathon - Springboot Jersey App 2
+# Wavefront Distributed Tracing Sample Apps - Springboot Jersey App 2
 
 This is a sample java application using Springboot beachshirts (#[beachops](https://medium.com/@matthewzeier/thoughts-from-an-operations-wrangler-how-we-use-alerts-to-monitor-wavefront-71329c5e57a8)) 
 which makes shirts for the beach. The application is based on spring boot web using rest templates and rest annotations.
