@@ -11,7 +11,7 @@ which makes shirts for the beach. The application is based on spring boot web us
 
 - ```bash
   git clone https://github.com/howardyoo/distributed-tracing-sample-apps/
-  cd hackathon/3D-microservices-observability/springboot-jersey-app-2
+  cd ./distributed-tracing-sample-apps/3D-microservices-observability/springboot-jersey-app-2
   ```
 - Run `mvn clean install` from the root directory of the project.
 
