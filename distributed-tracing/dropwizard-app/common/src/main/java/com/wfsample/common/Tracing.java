@@ -26,7 +26,7 @@ public final class Tracing {
   private Tracing() {
   }
 
-  public static io.opentracing.Tracer init(String service) {
+  public static Tracer init(String service) {
     SamplerConfiguration samplerConfig = SamplerConfiguration.fromEnv()
         .withType(ConstSampler.TYPE)
         .withParam(1);

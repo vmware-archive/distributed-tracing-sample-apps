@@ -73,7 +73,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
 
 3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
 
-4. Go to `dropwizard-app/common/src/main/java/com/wfsample/common/Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of `io.opentracing.Tracer` as follows:
+4. Go to `dropwizard-app/common/src/main/java/com/wfsample/common/Tracing.java` and change the `Tracer init(String service)` method to return a [WavefrontTracer](https://github.com/wavefrontHQ/wavefront-opentracing-sdk-java#set-up-a-tracer) instead of a Jaeger `Tracer` as follows:
 
    ```java
    public static Tracer init(String service) {
