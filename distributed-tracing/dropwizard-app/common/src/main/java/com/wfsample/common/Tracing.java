@@ -1,24 +1,19 @@
 package com.wfsample.common;
 
-import com.uber.jaeger.Configuration;
-import com.uber.jaeger.Configuration.ReporterConfiguration;
-import com.uber.jaeger.Configuration.SamplerConfiguration;
-import com.uber.jaeger.samplers.ConstSampler;
-
-import io.opentracing.Scope;
+import io.jaegertracing.Configuration;
+import io.jaegertracing.Configuration.ReporterConfiguration;
+import io.jaegertracing.Configuration.SamplerConfiguration;
+import io.jaegertracing.internal.samplers.ConstSampler;
+import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.propagation.Format;
-import io.opentracing.propagation.TextMap;
-import io.opentracing.propagation.TextMapExtractAdapter;
+import io.opentracing.propagation.TextMapAdapter;
 import io.opentracing.tag.Tags;
-import okhttp3.Request;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
-
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
 
 public final class Tracing {
@@ -31,7 +26,7 @@ public final class Tracing {
   private Tracing() {
   }
 
-  public static com.uber.jaeger.Tracer init(String service) {
+  public static Tracer init(String service) {
     SamplerConfiguration samplerConfig = SamplerConfiguration.fromEnv()
         .withType(ConstSampler.TYPE)
         .withParam(1);
@@ -42,10 +37,10 @@ public final class Tracing {
         .withSampler(samplerConfig)
         .withReporter(reporterConfig);
 
-    return (com.uber.jaeger.Tracer) config.getTracer();
+    return config.getTracer();
   }
 
-  public static Scope startServerSpan(Tracer tracer, javax.ws.rs.core.HttpHeaders httpHeaders, String operationName) {
+  public static Span startServerSpan(Tracer tracer, HttpHeaders httpHeaders, String operationName) {
     // format the headers for extraction
     MultivaluedMap<String, String> rawHeaders = httpHeaders.getRequestHeaders();
     final HashMap<String, String> headers = new HashMap<>();
@@ -55,7 +50,7 @@ public final class Tracing {
 
     Tracer.SpanBuilder spanBuilder;
     try {
-      SpanContext parentSpanCtx = tracer.extract(Format.Builtin.HTTP_HEADERS, new TextMapExtractAdapter(headers));
+      SpanContext parentSpanCtx = tracer.extract(Format.Builtin.HTTP_HEADERS, new TextMapAdapter(headers));
       if (parentSpanCtx == null) {
         spanBuilder = tracer.buildSpan(operationName);
       } else {
@@ -64,8 +59,7 @@ public final class Tracing {
     } catch (IllegalArgumentException e) {
       spanBuilder = tracer.buildSpan(operationName);
     }
-    return appendCustomTags(spanBuilder.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)).
-        startActive(true);
+    return appendCustomTags(spanBuilder.withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)).start();
   }
 
   public static Tracer.SpanBuilder appendCustomTags(Tracer.SpanBuilder spanBuilder) {
@@ -74,17 +68,4 @@ public final class Tracing {
         withTag("tenant", TENANT_TAGS[RAND.nextInt(TENANT_TAGS.length)]);
   }
 
-  public static TextMap requestBuilderCarrier(final Request.Builder builder) {
-    return new TextMap() {
-      @Override
-      public Iterator<Map.Entry<String, String>> iterator() {
-        throw new UnsupportedOperationException("carrier is write-only");
-      }
-
-      @Override
-      public void put(String key, String value) {
-        builder.addHeader(key, value);
-      }
-    };
-  }
 }

@@ -7,6 +7,7 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
 
+import io.opentracing.Span;
 import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  * @author Srujan Narkedamalli (snarkedamall@wavefront.com).
  */
 public class ShoppingService extends Application<DropwizardServiceConfig> {
-  private static Logger logger = LoggerFactory.getLogger(ShoppingService.class);
+  private static final Logger logger = LoggerFactory.getLogger(ShoppingService.class);
 
   private final Tracer tracer;
 
@@ -70,9 +71,11 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     @GET
     @Path("/menu")
     public Response getShoppingMenu(@Context HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.appendCustomTags(tracer.buildSpan("getShoppingMenu")).
-          startActive(true)) {
+      Span span = Tracing.appendCustomTags(tracer.buildSpan("getShoppingMenu")).start();
+      try (Scope ignored = tracer.scopeManager().activate(span)) {
         return Response.ok(stylingApi.getAllStyles(httpHeaders)).build();
+      } finally {
+        span.finish();
       }
     }
 
@@ -80,10 +83,10 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     @Path("/order")
     @Consumes(APPLICATION_JSON)
     public Response orderShirts(OrderDTO orderDTO, @Context HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.appendCustomTags(tracer.buildSpan("orderShirts")).
-          startActive(true)) {
+      Span span =  Tracing.appendCustomTags(tracer.buildSpan("orderShirts")).start();
+      try (Scope ignored = tracer.scopeManager().activate(span)) {
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
@@ -94,11 +97,13 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
           DeliveryStatusDTO deliveryStatus = deliveryResponse.readEntity(DeliveryStatusDTO.class);
           return Response.ok().entity(deliveryStatus).build();
         } else {
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();
         }
+      } finally {
+        span.finish();
       }
     }
   }
