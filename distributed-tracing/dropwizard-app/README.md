@@ -68,7 +68,7 @@ This is a sample Java application using Dropwizard called beachshirts (#[beachop
          -e JAVA_HEAP_USAGE=512m \
          -p 2878:2878 \
          -p 4242:4242 \
-         wavefrontHQ/proxy:latest
+         wavefronthq/proxy:latest
      ```
 
 3. If you are sending data to Wavefront via Direct Ingestion, then make sure you have the cluster name and corresponding token from [https://{cluster}.wavefront.com/settings/profile](https://{cluster}.wavefront.com/settings/profile).
