@@ -102,11 +102,6 @@
             <artifactId>jackson-module-afterburner</artifactId>
             <version>${jackson.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.opentracing.contrib</groupId>
-            <artifactId>opentracing-jaxrs2-discovery</artifactId>
-            <version>1.0.0</version>
-        </dependency>
     </dependencies>
 
     <build>

@@ -2,7 +2,6 @@ package com.wfsample.styling;
 
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
-import com.wfsample.common.Tracing;
 import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.ShirtDTO;
 import com.wfsample.common.dto.ShirtStyleDTO;
@@ -10,8 +9,6 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
-import io.opentracing.Span;
-import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +22,6 @@ import javax.ws.rs.core.Response;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
-import io.opentracing.Scope;
-import io.opentracing.Tracer;
 
 import static java.util.stream.Collectors.toList;
 
@@ -39,15 +34,8 @@ import static java.util.stream.Collectors.toList;
 public class StylingService extends Application<DropwizardServiceConfig> {
   private static final Logger logger = LoggerFactory.getLogger(StylingService.class);
 
-  private final Tracer tracer;
-
-  private StylingService(Tracer tracer) {
-    this.tracer = tracer;
-  }
-
   public static void main(String[] args) throws Exception {
-    Tracer tracer = Tracing.init("styling");
-    new StylingService(tracer).run(args);
+    new StylingService().run(args);
   }
 
   @Override
@@ -55,7 +43,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
     String deliveryUrl = "http://" + configuration.getDeliveryHost() + ":" + configuration
         .getDeliveryPort();
     environment.jersey().register(new StylingWebResource(
-        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class, this.tracer)));
+        BeachShirtsUtils.createProxyClient(deliveryUrl, DeliveryApi.class)));
   }
 
   public class StylingWebResource implements StylingApi {
@@ -77,22 +65,14 @@ public class StylingService extends Application<DropwizardServiceConfig> {
 
     @Override
     public List<ShirtStyleDTO> getAllStyles(HttpHeaders httpHeaders) {
-      Span span = Tracing.startServerSpan(tracer, httpHeaders, "getAllStyles");
-      try (Scope ignored = tracer.scopeManager().activate(span)) {
         return shirtStyleDTOS;
-      } finally {
-        span.finish();
-      }
     }
 
     @Override
     public Response makeShirts(String id, int quantity, HttpHeaders httpHeaders) {
-      Span span = Tracing.startServerSpan(tracer, httpHeaders, "makeShirts");
-      try (Scope ignored = tracer.scopeManager().activate(span)) {
         if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
           String msg = "Failed to make shirts!";
           logger.warn(msg);
-          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
         }
         String orderNum = UUID.randomUUID().toString();
@@ -108,14 +88,10 @@ public class StylingService extends Application<DropwizardServiceConfig> {
         if (deliveryResponse.getStatus() < 400) {
           return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
         } else {
-          span.setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to make shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();
         }
-      } finally {
-        span.finish();
-      }
     }
   }
 }

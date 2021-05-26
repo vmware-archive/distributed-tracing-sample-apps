@@ -2,13 +2,10 @@ package com.wfsample.shopping;
 
 import com.wfsample.common.BeachShirtsUtils;
 import com.wfsample.common.DropwizardServiceConfig;
-import com.wfsample.common.Tracing;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.common.dto.OrderDTO;
 import com.wfsample.service.StylingApi;
 
-import io.opentracing.Span;
-import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +23,6 @@ import javax.ws.rs.core.Response;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
-import io.opentracing.Scope;
-import io.opentracing.Tracer;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -40,15 +35,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class ShoppingService extends Application<DropwizardServiceConfig> {
   private static final Logger logger = LoggerFactory.getLogger(ShoppingService.class);
 
-  private final Tracer tracer;
-
-  private ShoppingService(Tracer tracer) {
-    this.tracer = tracer;
-  }
-
   public static void main(String[] args) throws Exception {
-    Tracer tracer = Tracing.init("shopping");
-    new ShoppingService(tracer).run(args);
+    new ShoppingService().run(args);
   }
 
   @Override
@@ -56,7 +44,7 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     String stylingUrl = "http://" + configuration.getStylingHost() + ":" + configuration
         .getStylingPort();
     environment.jersey().register(new ShoppingWebResource(
-        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class, this.tracer)));
+        BeachShirtsUtils.createProxyClient(stylingUrl, StylingApi.class)));
   }
 
   @Path("/shop")
@@ -71,22 +59,14 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
     @GET
     @Path("/menu")
     public Response getShoppingMenu(@Context HttpHeaders httpHeaders) {
-      Span span = Tracing.appendCustomTags(tracer.buildSpan("getShoppingMenu")).start();
-      try (Scope ignored = tracer.scopeManager().activate(span)) {
         return Response.ok(stylingApi.getAllStyles(httpHeaders)).build();
-      } finally {
-        span.finish();
-      }
     }
 
     @POST
     @Path("/order")
     @Consumes(APPLICATION_JSON)
     public Response orderShirts(OrderDTO orderDTO, @Context HttpHeaders httpHeaders) {
-      Span span =  Tracing.appendCustomTags(tracer.buildSpan("orderShirts")).start();
-      try (Scope ignored = tracer.scopeManager().activate(span)) {
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
-          span.setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
@@ -97,14 +77,10 @@ public class ShoppingService extends Application<DropwizardServiceConfig> {
           DeliveryStatusDTO deliveryStatus = deliveryResponse.readEntity(DeliveryStatusDTO.class);
           return Response.ok().entity(deliveryStatus).build();
         } else {
-          span.setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to order shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();
         }
-      } finally {
-        span.finish();
-      }
     }
   }
 }
