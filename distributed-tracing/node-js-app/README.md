@@ -51,7 +51,7 @@ Node.js version >= 8.9.1 is supported.
 1. Configure the [Wavefront Jaeger Integration](https://docs.wavefront.com/jaeger.html#jaeger-integration-setup):
    * Install and configure the Wavefront proxy (version >= 4.38), adding `traceJaegerListenerPorts=<enter-available-port>`. You can use the following command to run Wavefront proxy in docker:
        ```
-      $ docker run -d \
+      $ docker run -d --name wfproxy \
          -e WAVEFRONT_URL=https://{CLUSTER}.wavefront.com/api/ \
          -e WAVEFRONT_TOKEN={TOKEN} \
          -e JAVA_HEAP_USAGE=512m \
@@ -62,6 +62,7 @@ Node.js version >= 8.9.1 is supported.
          -p 50000:50000 \
          wavefronthq/proxy:latest
        ```
+   * Replace `{CLUSTER}` with the cluster name of your wavefront. Replace `{TOKEN}` with the valid API token.
    
    * Restart Jaeger using the following commands:
       ```
