@@ -6,6 +6,7 @@ import com.wfsample.common.dto.PackedShirtsDTO;
 import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 
+import io.opentracing.Span;
 import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ import io.opentracing.Tracer;
  */
 public class DeliveryService extends Application<DropwizardServiceConfig> {
   private static Queue<PackedShirtsDTO> dispatchQueue;
-  private static Logger logger = LoggerFactory.getLogger(DeliveryService.class);
+  private static final Logger logger = LoggerFactory.getLogger(DeliveryService.class);
 
   private final Tracer tracer;
 
@@ -79,11 +80,12 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
 
     @Override
     public Response dispatch(String orderNum, PackedShirtsDTO packedShirts, HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "dispatch")) {
+      Span span = Tracing.startServerSpan(tracer, httpHeaders, "dispatch");
+      try (Scope ignored = tracer.scopeManager().activate(span)) {
         if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
           String msg = "Failed to dispatch shirts!";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
         }
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
@@ -92,7 +94,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         if (orderNum.isEmpty()) {
           String msg = "Invalid Order Num";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         if (ThreadLocalRandom.current().nextInt(0, 10) == 0) {
@@ -102,7 +104,7 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
             packedShirts.getShirts().size() == 0) {
           String msg = "No shirts to deliver";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         dispatchQueue.add(packedShirts);
@@ -110,19 +112,24 @@ public class DeliveryService extends Application<DropwizardServiceConfig> {
         System.out.println("Tracking number of Order:" + orderNum + " is " + trackingNum);
         return Response.ok(new DeliveryStatusDTO(orderNum, trackingNum,
             "shirts delivery dispatched")).build();
+      } finally {
+        span.finish();
       }
     }
 
     @Override
     public Response retrieve(String orderNum, HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "retrieve")) {
+      Span span = Tracing.startServerSpan(tracer, httpHeaders, "retrieve");
+      try (Scope ignored = tracer.scopeManager().activate(span)) {
         if (orderNum.isEmpty()) {
           String msg = "Invalid Order Num";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         return Response.ok("Order: " + orderNum + " returned").build();
+      } finally {
+        span.finish();
       }
     }
   }

@@ -10,6 +10,7 @@ import com.wfsample.common.dto.DeliveryStatusDTO;
 import com.wfsample.service.DeliveryApi;
 import com.wfsample.service.StylingApi;
 
+import io.opentracing.Span;
 import io.opentracing.tag.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ import static java.util.stream.Collectors.toList;
  * @author Srujan Narkedamalli (snarkedamall@wavefront.com).
  */
 public class StylingService extends Application<DropwizardServiceConfig> {
-  private static Logger logger = LoggerFactory.getLogger(StylingService.class);
+  private static final Logger logger = LoggerFactory.getLogger(StylingService.class);
 
   private final Tracer tracer;
 
@@ -59,7 +60,7 @@ public class StylingService extends Application<DropwizardServiceConfig> {
 
   public class StylingWebResource implements StylingApi {
     // sample set of static styles.
-    private List<ShirtStyleDTO> shirtStyleDTOS = new ArrayList<>();
+    private final List<ShirtStyleDTO> shirtStyleDTOS = new ArrayList<>();
     private final DeliveryApi deliveryApi;
 
     StylingWebResource(DeliveryApi deliveryApi) {
@@ -76,18 +77,22 @@ public class StylingService extends Application<DropwizardServiceConfig> {
 
     @Override
     public List<ShirtStyleDTO> getAllStyles(HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "getAllStyles")) {
+      Span span = Tracing.startServerSpan(tracer, httpHeaders, "getAllStyles");
+      try (Scope ignored = tracer.scopeManager().activate(span)) {
         return shirtStyleDTOS;
+      } finally {
+        span.finish();
       }
     }
 
     @Override
     public Response makeShirts(String id, int quantity, HttpHeaders httpHeaders) {
-      try (Scope scope = Tracing.startServerSpan(tracer, httpHeaders, "makeShirts")) {
+      Span span = Tracing.startServerSpan(tracer, httpHeaders, "makeShirts");
+      try (Scope ignored = tracer.scopeManager().activate(span)) {
         if (ThreadLocalRandom.current().nextInt(0, 5) == 0) {
           String msg = "Failed to make shirts!";
           logger.warn(msg);
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(msg).build();
         }
         String orderNum = UUID.randomUUID().toString();
@@ -103,11 +108,13 @@ public class StylingService extends Application<DropwizardServiceConfig> {
         if (deliveryResponse.getStatus() < 400) {
           return Response.ok().entity(deliveryResponse.readEntity(DeliveryStatusDTO.class)).build();
         } else {
-          scope.span().setTag(Tags.ERROR.getKey(), true);
+          span.setTag(Tags.ERROR.getKey(), true);
           String msg = "Failed to make shirts!";
           logger.warn(msg);
           return Response.status(deliveryResponse.getStatus()).entity(msg).build();
         }
+      } finally {
+        span.finish();
       }
     }
   }
