@@ -1,0 +1,19 @@
+# Spring properties
+spring:
+  application:
+     name: delivery-service
+
+# Discovery Server Access
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:1111/eureka/
+
+# HTTP Server
+server:
+  port: 2222   # HTTP (Tomcat) port
+
+# wavefront
+wavefront:
+  application:
+    name: SpringShirts
